@@ -5,13 +5,14 @@ const annotation = document.getElementById('annotation');
 const connector = document.getElementById('connector');
 const connectorPath = document.getElementById('connector-path');
 const noteLines = [...document.querySelectorAll('.hand-note span')];
+const intro = document.getElementById('intro');
 const overview = document.getElementById('overview');
 const focus = document.getElementById('focus');
 const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .38, .66, 1];
+const checkpoints = [0, .26, .56, .76, 1];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -41,25 +42,33 @@ function drawConnector() {
 function update() {
   ticking = false;
   const p = progress();
-  const zoom = ramp(p, .08, .31);
-  const focused = ramp(p, .16, .35);
+  const zoom = ramp(p, .32, .54);
+  const focused = ramp(p, .42, .56);
   root.style.setProperty('--progress', p.toFixed(4));
-  root.style.setProperty('--overview-opacity', (1 - ramp(p, .17, .32)).toFixed(4));
+  root.style.setProperty('--intro-opacity', (1 - ramp(p, .09, .19)).toFixed(4));
+  root.style.setProperty('--chrome-opacity', ramp(p, .16, .25).toFixed(4));
+  root.style.setProperty('--chrome-events', p >= .22 ? 'auto' : 'none');
+  root.style.setProperty('--overview-opacity', (ramp(p, .13, .23) * (1 - ramp(p, .42, .56))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
   root.style.setProperty('--overview-scale', (overviewFit * (1 + zoom * 1.2)).toFixed(4));
   root.style.setProperty('--focus-opacity', focused.toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
-  root.style.setProperty('--circle', ramp(p, .48, .64).toFixed(4));
-  root.style.setProperty('--connector', ramp(p, .63, .75).toFixed(4));
-  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .73 + i * .037, .81 + i * .037).toFixed(4)));
-  root.style.setProperty('--underline', ramp(p, .91, .98).toFixed(4));
-  document.getElementById('stage-number').textContent = p < .25 ? '01' : p < .6 ? '02' : '03';
-  document.getElementById('progress-copy').textContent = p < .25 ? 'THE WHOLE CHAPTER' : p < .6 ? 'VERSE ONE' : 'MERCIES OF GOD';
-  const chapterIsActive = p < .3;
+  root.style.setProperty('--circle', ramp(p, .62, .76).toFixed(4));
+  root.style.setProperty('--connector', ramp(p, .76, .84).toFixed(4));
+  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .81 + i * .03, .87 + i * .03).toFixed(4)));
+  root.style.setProperty('--underline', ramp(p, .96, 1).toFixed(4));
+  document.getElementById('stage-number').textContent = p < .4 ? '01' : p < .69 ? '02' : '03';
+  document.getElementById('progress-copy').textContent = p < .4 ? 'THE WHOLE CHAPTER' : p < .69 ? 'VERSE ONE' : 'MERCIES OF GOD';
+  const chapterIsActive = p >= .21 && p < .5;
+  const focusIsActive = p >= .5;
   overview.classList.toggle('is-active', chapterIsActive);
-  focus.classList.toggle('is-active', !chapterIsActive);
-  if (!copyFeedback) copyButton.textContent = chapterIsActive ? 'COPY CHAPTER' : 'COPY VERSE';
-  copyButton.setAttribute('aria-label', chapterIsActive ? 'Copy Romans 12' : 'Copy Romans 12 verse 1');
+  focus.classList.toggle('is-active', focusIsActive);
+  intro.setAttribute('aria-hidden', p >= .2);
+  overview.setAttribute('aria-hidden', !chapterIsActive);
+  focus.setAttribute('aria-hidden', !focusIsActive);
+  copyButton.disabled = p < .21;
+  if (!copyFeedback) copyButton.textContent = focusIsActive ? 'COPY VERSE' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', focusIsActive ? 'Copy Romans 12 verse 1' : 'Copy Romans 12');
   drawConnector();
 }
 
@@ -144,7 +153,7 @@ window.addEventListener('scroll', () => {
 }, {passive:true});
 
 copyButton.addEventListener('click', async () => {
-  const source = progress() < .3 ? document.querySelector('.chapter-text') : document.querySelector('.verse');
+  const source = progress() < .5 ? document.querySelector('.chapter-text') : document.querySelector('.verse');
   const text = source.innerText.replace(/\s+/g, ' ').trim();
   try {
     await navigator.clipboard.writeText(text);
