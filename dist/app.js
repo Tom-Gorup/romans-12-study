@@ -31,6 +31,7 @@ const translationNote = document.getElementById('translation-note');
 const testingNote = document.getElementById('testing-note');
 const translationLines = [...translationNote.querySelectorAll('.hand-note span')];
 const testingLines = [...testingNote.querySelectorAll('.hand-note span')];
+const handNotes = [...document.querySelectorAll('.hand-note')];
 const rangeThree = document.querySelector('.range-three');
 const rangeThreeFive = document.querySelector('.range-three-five');
 const copyButton = document.getElementById('copy-button');
@@ -241,6 +242,17 @@ function scheduleUpdate() {
     requestAnimationFrame(update);
   }
 }
+
+function fitHandNotes() {
+  handNotes.forEach(note => {
+    note.style.fontSize = '';
+    const baseSize = parseFloat(getComputedStyle(note).fontSize);
+    const available = Math.max(100, note.clientWidth - 28);
+    const widestLine = Math.max(...[...note.querySelectorAll('span')].map(line => line.scrollWidth));
+    if (widestLine > available) note.style.fontSize = `${Math.max(14, baseSize * available / widestLine)}px`;
+  });
+  scheduleUpdate();
+}
 function animateToCheckpoint(index, quick = false) {
   if (navigating && !quick) return;
   const token = ++navigationToken;
@@ -362,6 +374,6 @@ navButtons.forEach(button => button.addEventListener('click', () => {
 }));
 navButtons.forEach(button => button.addEventListener('mouseleave', () => button.classList.remove('hide-tooltip')));
 
-window.addEventListener('resize', scheduleUpdate);
-document.fonts?.ready.then(scheduleUpdate);
-scheduleUpdate();
+window.addEventListener('resize', fitHandNotes);
+document.fonts?.ready.then(fitHandNotes);
+fitHandNotes();

@@ -157,3 +157,23 @@
   .passage-group .passage-flow .passage-text,
   .passage-dense .passage-flow .passage-text { font-size: clamp(15px, 1.9vw, 24px); line-height: 1.2; }
 }
+
+/* Keep Scripture at one reading size across every verse stop. */
+:root { --scripture-size: clamp(17px, 3.55vw, 32px); }
+.focus .verse,
+.passage-slide .passage-text,
+.passage-two .passage-text,
+.passage-expand .passage-text,
+.passage-group .passage-flow .passage-text,
+.passage-dense .passage-flow .passage-text {
+  font-size: var(--scripture-size);
+  line-height: 1.28;
+  letter-spacing: -.02em;
+}
+.passage-slide .passage-frame { width: min(1200px, 100%); }
+.passage-slide .passage-heading { margin-bottom: clamp(15px, 2.5vw, 28px); }
+.passage-slide .passage-body { max-width: 1120px; }
+.passage-two .passage-body { max-width: none; }
+
+/* Full handwriting lines stay measurable while their reveal animation runs. */
+.hand-note span { white-space: nowrap; }
