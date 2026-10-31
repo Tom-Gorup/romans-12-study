@@ -153,9 +153,9 @@ function update() {
   root.style.setProperty('--intro-opacity', (1 - ramp(p, .04, .11)).toFixed(4));
   root.style.setProperty('--chrome-opacity', ramp(p, .07, .12).toFixed(4));
   root.style.setProperty('--chrome-events', p >= .1 ? 'auto' : 'none');
-  const backgroundOpacity = ramp(raw, .23, .26) * (1 - ramp(raw, .33, .36));
+  const backgroundOpacity = ramp(raw, .23, .26) * (1 - ramp(raw, .37, .40));
   root.style.setProperty('--background-opacity', backgroundOpacity.toFixed(4));
-  const responsesOpacity = ramp(raw, .85, .88) * (1 - ramp(raw, .95, .98));
+  const responsesOpacity = ramp(raw, .85, .88) * (1 - ramp(raw, .96, 1.02));
   root.style.setProperty('--responses-opacity', responsesOpacity.toFixed(4));
   root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(p, .2, .28))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
@@ -222,15 +222,15 @@ function update() {
     const travel = Math.max(0, textNode.scrollHeight - windowNode.clientHeight + 20);
     textNode.style.setProperty('--passage-pan', `${(-travel * amount).toFixed(1)}px`);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .36 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < .98 ? '06' : p < 1.30 ? '07' : p < 1.67 ? '08' : '09';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .36 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < .98 ? 'THREE RESPONSES' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : p < 1.30 ? '07' : p < 1.67 ? '08' : '09';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
-  const backgroundIsActive = raw >= .23 && raw < .36;
+  const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
-  const responsesIsActive = raw >= .85 && raw < .98;
+  const responsesIsActive = raw >= .85 && raw < 1.02;
   const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
   const focusIsActive = !responsesIsActive && p >= .73 && p < 1.30;
-  const activeTheme = p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
+  const activeTheme = responsesIsActive || p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);
     theme.setAttribute('aria-hidden', index !== activeTheme);
@@ -362,8 +362,8 @@ window.addEventListener('scroll', () => {
 copyButton.addEventListener('click', async () => {
   const raw = progress();
   const p = logicalProgress(raw);
-  const theme = raw >= .98 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
-  const source = raw >= .85 && raw < .98 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .36 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
+  const theme = raw >= 1.02 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
+  const source = raw >= .85 && raw < 1.02 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .40 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
   const text = (theme
     ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
     : source.innerText).replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
