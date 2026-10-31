@@ -7,12 +7,13 @@ const connectorPath = document.getElementById('connector-path');
 const noteLines = [...document.querySelectorAll('.hand-note span')];
 const intro = document.getElementById('intro');
 const overview = document.getElementById('overview');
+const bookMap = document.getElementById('book-map');
 const focus = document.getElementById('focus');
 const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .26, .56, .76, 1];
+const checkpoints = [0, .18, .42, .64, .8, 1];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -42,33 +43,40 @@ function drawConnector() {
 function update() {
   ticking = false;
   const p = progress();
-  const zoom = ramp(p, .32, .54);
-  const focused = ramp(p, .42, .56);
+  const pullBack = ramp(p, .25, .42);
+  const mapIn = ramp(p, .3, .42);
+  const mapOut = ramp(p, .52, .64);
+  const focused = ramp(p, .53, .64);
   root.style.setProperty('--progress', p.toFixed(4));
-  root.style.setProperty('--intro-opacity', (1 - ramp(p, .09, .19)).toFixed(4));
-  root.style.setProperty('--chrome-opacity', ramp(p, .16, .25).toFixed(4));
-  root.style.setProperty('--chrome-events', p >= .22 ? 'auto' : 'none');
-  root.style.setProperty('--overview-opacity', (ramp(p, .13, .23) * (1 - ramp(p, .42, .56))).toFixed(4));
+  root.style.setProperty('--intro-opacity', (1 - ramp(p, .07, .15)).toFixed(4));
+  root.style.setProperty('--chrome-opacity', ramp(p, .11, .18).toFixed(4));
+  root.style.setProperty('--chrome-events', p >= .16 ? 'auto' : 'none');
+  root.style.setProperty('--overview-opacity', (ramp(p, .1, .18) * (1 - ramp(p, .31, .42))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
-  root.style.setProperty('--overview-scale', (overviewFit * (1 + zoom * 1.2)).toFixed(4));
+  root.style.setProperty('--overview-scale', (overviewFit * (1 - pullBack * .58)).toFixed(4));
+  root.style.setProperty('--map-opacity', (mapIn * (1 - mapOut)).toFixed(4));
+  root.style.setProperty('--map-scale', (.84 + mapIn * .16 + mapOut * .42).toFixed(4));
   root.style.setProperty('--focus-opacity', focused.toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
-  root.style.setProperty('--circle', ramp(p, .62, .76).toFixed(4));
-  root.style.setProperty('--connector', ramp(p, .76, .84).toFixed(4));
-  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .81 + i * .03, .87 + i * .03).toFixed(4)));
-  root.style.setProperty('--underline', ramp(p, .96, 1).toFixed(4));
-  document.getElementById('stage-number').textContent = p < .4 ? '01' : p < .69 ? '02' : '03';
-  document.getElementById('progress-copy').textContent = p < .4 ? 'THE WHOLE CHAPTER' : p < .69 ? 'VERSE ONE' : 'MERCIES OF GOD';
-  const chapterIsActive = p >= .21 && p < .5;
-  const focusIsActive = p >= .5;
+  root.style.setProperty('--circle', ramp(p, .72, .8).toFixed(4));
+  root.style.setProperty('--connector', ramp(p, .8, .87).toFixed(4));
+  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .84 + i * .025, .89 + i * .025).toFixed(4)));
+  root.style.setProperty('--underline', ramp(p, .97, 1).toFixed(4));
+  document.getElementById('stage-number').textContent = p < .3 ? '01' : p < .53 ? '02' : p < .72 ? '03' : '04';
+  document.getElementById('progress-copy').textContent = p < .3 ? 'THE WHOLE CHAPTER' : p < .53 ? 'THE WHOLE LETTER' : p < .72 ? 'VERSE ONE' : 'MERCIES OF GOD';
+  const chapterIsActive = p >= .15 && p < .34;
+  const mapIsActive = p >= .34 && p < .57;
+  const focusIsActive = p >= .57;
   overview.classList.toggle('is-active', chapterIsActive);
+  bookMap.classList.toggle('is-active', mapIsActive);
   focus.classList.toggle('is-active', focusIsActive);
-  intro.setAttribute('aria-hidden', p >= .2);
+  intro.setAttribute('aria-hidden', p >= .15);
   overview.setAttribute('aria-hidden', !chapterIsActive);
+  bookMap.setAttribute('aria-hidden', !mapIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
-  copyButton.disabled = p < .21;
-  if (!copyFeedback) copyButton.textContent = focusIsActive ? 'COPY VERSE' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', focusIsActive ? 'Copy Romans 12 verse 1' : 'Copy Romans 12');
+  copyButton.disabled = p < .15;
+  if (!copyFeedback) copyButton.textContent = focusIsActive ? 'COPY VERSE' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', focusIsActive ? 'Copy Romans 12 verse 1' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
   drawConnector();
 }
 
@@ -153,22 +161,26 @@ window.addEventListener('scroll', () => {
 }, {passive:true});
 
 copyButton.addEventListener('click', async () => {
-  const source = progress() < .5 ? document.querySelector('.chapter-text') : document.querySelector('.verse');
+  const p = progress();
+  const source = p >= .57 ? document.querySelector('.verse') : p >= .34 ? bookMap : document.querySelector('.chapter-text');
   const text = source.innerText.replace(/\s+/g, ' ').trim();
-  try {
-    await navigator.clipboard.writeText(text);
-    copyButton.textContent = 'COPIED';
-  } catch {
-    const fallback = document.createElement('textarea');
-    fallback.value = text;
-    fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
-    document.body.appendChild(fallback);
-    fallback.select();
-    const copied = document.execCommand('copy');
-    fallback.remove();
-    copyButton.textContent = copied ? 'COPIED' : 'COPY FAILED';
-  }
+  const fallback = document.createElement('textarea');
+  fallback.value = text;
+  fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(fallback);
+  fallback.select();
+  let copied = false;
+  try { copied = document.execCommand('copy'); } catch { /* Try the Clipboard API next. */ }
+  fallback.remove();
+  copyButton.textContent = copied ? 'COPIED' : 'COPYING…';
   copyFeedback = true;
+  if (!copied && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch { /* The button will show the failure below. */ }
+  }
+  copyButton.textContent = copied ? 'COPIED' : 'COPY FAILED';
   setTimeout(() => { copyFeedback = false; scheduleUpdate(); }, 1800);
 });
 
