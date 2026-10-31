@@ -19,6 +19,10 @@ const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicConclusion = document.querySelector('.logic-conclusion');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
+const themeWorship = document.getElementById('theme-worship');
+const themeServe = document.getElementById('theme-serve');
+const themeLove = document.getElementById('theme-love');
+const themes = [themeWorship, themeServe, themeLove];
 const passageSlides = [...document.querySelectorAll('.passage-slide')];
 const passageExtension = document.querySelector('.passage-extension');
 const verseTwoSlide = document.querySelector('.passage-two');
@@ -208,12 +212,17 @@ function update() {
     slide.classList.toggle('is-active', index === passageIndex);
     slide.setAttribute('aria-hidden', index !== passageIndex);
   });
-  document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .82 ? '04' : p < .94 ? '05' : p < 1.07 ? '06' : p < 1.30 ? '07' : p < 1.51 ? '08' : p < 1.62 ? '09' : p < 1.73 ? '10' : p < 1.95 ? '11' : '12';
-  document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .82 ? 'VERSE ONE' : p < .94 ? 'MERCIES OF GOD' : p < 1.07 ? 'LIVING SACRIFICE' : p < 1.11 ? 'VERSE TWO' : p < 1.18 ? 'RE-MOULDED MINDS' : p < 1.30 ? 'TEST AND DISCERN' : p < 1.51 ? 'VERSES THREE TO FIVE' : p < 1.62 ? 'GIFTS OF GRACE' : p < 1.73 ? 'GENUINE LOVE' : p < 1.95 ? 'LOVE IN ACTION' : 'OVERCOME EVIL WITH GOOD';
+  document.getElementById('stage-number').textContent = p < .08 ? '01' : p < .2 ? '02' : p < .35 ? '03' : p < .73 ? '04' : p < 1.30 ? '05' : p < 1.67 ? '06' : '07';
+  document.getElementById('progress-copy').textContent = p < .2 ? 'ROMANS 12' : p < .35 ? 'THE WHOLE LETTER' : p < .73 ? 'THE GOSPEL’S LOGIC' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
   const mapIsActive = p >= .23 && p < .38;
   const logicIsActive = p >= .38 && p < .73;
   const focusIsActive = p >= .73 && p < 1.06;
+  const activeTheme = p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
+  themes.forEach((theme, index) => {
+    theme.classList.toggle('is-active', index === activeTheme);
+    theme.setAttribute('aria-hidden', index !== activeTheme);
+  });
   overview.classList.toggle('is-active', chapterIsActive);
   bookMap.classList.toggle('is-active', mapIsActive);
   logicOverview.classList.toggle('is-active', logicIsActive);
@@ -224,9 +233,10 @@ function update() {
   logicOverview.setAttribute('aria-hidden', !logicIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
-  if (!copyFeedback) copyButton.textContent = passageIndex >= 0 ? 'COPY PASSAGE' : focusIsActive ? 'COPY VERSE' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', passageIndex >= 0 ? `Copy Romans 12 ${passageSlides[passageIndex].dataset.passage}` : focusIsActive ? 'Copy Romans 12 verse 1' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
-  const navIndex = p < .08 ? 0 : p < .2 ? 1 : p < .35 ? 2 : p < .72 ? 3 : p < .82 ? 4 : p < .94 ? 5 : p < 1.07 ? 6 : p < 1.14 ? 7 : p < 1.20 ? 8 : p < 1.30 ? 9 : p < 1.51 ? 10 : p < 1.62 ? 11 : p < 1.73 ? 12 : p < 1.95 ? 13 : 14;
+  if (!copyFeedback) copyButton.textContent = activeTheme >= 0 ? 'COPY SECTION' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', activeTheme >= 0 ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
+  const navIndex = navButtons.reduce((active, button, index) =>
+    p >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
     button.classList.toggle('is-active', index === navIndex);
     if (index === navIndex) button.setAttribute('aria-current', 'step');
@@ -335,8 +345,11 @@ window.addEventListener('scroll', () => {
 
 copyButton.addEventListener('click', async () => {
   const p = progress();
-  const source = p >= 1.08 ? p < 1.40 && p >= 1.30 ? passageSlides[1].querySelector('.passage-verse-three') : passageSlides.find(slide => slide.classList.contains('is-active'))?.querySelector('.passage-body') : p >= .73 ? document.querySelector('.verse') : p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
-  const text = source.innerText.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
+  const theme = p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : p >= .73 ? themeWorship : null;
+  const source = p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
+  const text = (theme
+    ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
+    : source.innerText).replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
   let copied = false;
   copyFeedback = true;
   copyButton.textContent = 'COPYING…';
