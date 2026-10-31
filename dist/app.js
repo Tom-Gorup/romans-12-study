@@ -23,7 +23,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .85, .91, 1];
+const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .91, 1];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -45,11 +45,12 @@ function drawConnector() {
     const a = from.getBoundingClientRect();
     const n = to.getBoundingClientRect();
     if (window.innerWidth <= 700) {
-      const x1 = a.left - s.left + a.width * .6;
-      const y1 = a.bottom - s.top + 7;
+      const x1 = a.left - s.left - 7;
+      const y1 = a.top - s.top + a.height * .55;
       const x2 = n.left - s.left + 10;
       const y2 = n.top - s.top + 12;
-      path.setAttribute('d', `M ${x1} ${y1} C ${x1 + 10} ${y1 + 45}, ${x2 - 22} ${y2 - 25}, ${x2} ${y2}`);
+      const gutter = window.innerWidth <= 450 ? 19 : 29;
+      path.setAttribute('d', `M ${x1} ${y1} C ${gutter} ${y1 + 10}, ${gutter} ${y1 + 35}, ${gutter} ${y2 - 34} C ${gutter} ${y2 - 10}, ${x2 - 28} ${y2 - 12}, ${x2} ${y2}`);
     } else {
       const x1 = a.right - s.left + 8;
       const y1 = a.top - s.top + a.height * .65;
@@ -98,6 +99,7 @@ function update() {
   root.style.setProperty('--circle', ramp(p, .78, .82).toFixed(4));
   root.style.setProperty('--connector', ramp(p, .82, .85).toFixed(4));
   root.style.setProperty('--mercy-opacity', mercyOpacity.toFixed(4));
+  root.style.setProperty('--mercy-note-opacity', (ramp(p, .85, .87) * mercyOpacity).toFixed(4));
   noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .85 + i * .008, .875 + i * .008).toFixed(4)));
   root.style.setProperty('--underline', ramp(p, .9, .91).toFixed(4));
   root.style.setProperty('--living-circle', ramp(p, .92, .95).toFixed(4));
@@ -105,7 +107,7 @@ function update() {
   root.style.setProperty('--living-opacity', ramp(p, .94, .97).toFixed(4));
   livingNoteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .965 + i * .006, .98 + i * .006).toFixed(4)));
   root.style.setProperty('--living-underline', ramp(p, .99, 1).toFixed(4));
-  annotation.setAttribute('aria-hidden', p >= .95);
+  annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
   livingAnnotation.setAttribute('aria-hidden', p < .94);
   document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .82 ? '04' : p < .94 ? '05' : '06';
   document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .82 ? 'VERSE ONE' : p < .94 ? 'MERCIES OF GOD' : 'LIVING SACRIFICE';
@@ -152,7 +154,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : quick ? 1100 : index === checkpoints.length - 1 ? 2200 : 1700;
+  const duration = reducedMotion.matches ? 0 : index >= 9 ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -245,7 +247,15 @@ copyButton.addEventListener('click', async () => {
 });
 
 navButtons.forEach(button => button.addEventListener('click', () => {
-  animateToCheckpoint(Number(button.dataset.checkpoint), true);
+  const index = Number(button.dataset.checkpoint);
+  if (index >= 9) {
+    ++navigationToken;
+    navigating = false;
+    const leadIn = checkpoints[index - 1] * Math.max(1, track.offsetHeight - window.innerHeight);
+    window.scrollTo(0, track.offsetTop + leadIn);
+    scheduleUpdate();
+    requestAnimationFrame(() => animateToCheckpoint(index));
+  } else animateToCheckpoint(index, true);
   button.classList.add('hide-tooltip');
   button.blur();
 }));
