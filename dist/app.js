@@ -144,7 +144,7 @@ function update() {
   const raw = progress();
   const p = logicalProgress(raw);
   const pullBack = ramp(p, .19, .28);
-  const mapIn = ramp(p, .21, .28);
+  const mapIn = ramp(raw, .39, .41);
   const mapOut = ramp(p, .34, .42);
   const logicIn = ramp(p, .35, .42);
   const logicOut = ramp(p, .7, .76);
@@ -157,7 +157,7 @@ function update() {
   root.style.setProperty('--background-opacity', backgroundOpacity.toFixed(4));
   const responsesOpacity = ramp(raw, .85, .88) * (1 - ramp(raw, .96, 1.02));
   root.style.setProperty('--responses-opacity', responsesOpacity.toFixed(4));
-  root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(p, .2, .28))).toFixed(4));
+  root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(raw, .18, .23))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
   root.style.setProperty('--overview-scale', (overviewFit * (1 - pullBack * .58)).toFixed(4));
   root.style.setProperty('--map-opacity', (mapIn * (1 - mapOut)).toFixed(4));
