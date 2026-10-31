@@ -29,7 +29,10 @@ const themeServe = document.getElementById('theme-serve');
 const themeLove = document.getElementById('theme-love');
 const themes = [themeWorship, themeServe, themeLove];
 const passageSlides = [...document.querySelectorAll('.passage-slide')];
-const servePassage = document.getElementById('serve-passage');
+const serve34 = document.getElementById('serve-34');
+const serve58 = document.getElementById('serve-58');
+const serve34Note = document.getElementById('serve-34-note');
+const serve58Note = document.getElementById('serve-58-note');
 const lovePassage = document.getElementById('love-passage');
 const verseTwoCanvas = focus;
 const verseTwoDrawing = document.getElementById('verse-two-drawing');
@@ -46,7 +49,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 2.12];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 1.80, 1.90, 2.00, 2.22, 2.42];
 const storyEnd = checkpoints[checkpoints.length - 1];
 function logicalProgress(raw) {
   if (raw < .23) return raw;
@@ -142,6 +145,53 @@ function drawVerseTwo() {
     : `M ${x1} ${y1} C ${x1 + 80} ${y1 - 25}, ${x2 - 75} ${y2 - 15}, ${x2} ${y2}`);
 }
 
+function drawServeAnnotations() {
+  const drawUnderline = (slide, svg, anchor, pathId) => {
+    const bounds = slide.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${bounds.width} ${bounds.height}`);
+    const rows = [];
+    const walker = document.createTreeWalker(anchor, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const range = document.createRange();
+      range.selectNodeContents(walker.currentNode);
+      for (const rect of range.getClientRects()) {
+        if (rect.width < 2 || rect.height < 2) continue;
+        const row = rows.find(item => Math.abs(item.top - rect.top) < 4);
+        if (row) {
+          row.left = Math.min(row.left, rect.left);
+          row.right = Math.max(row.right, rect.right);
+          row.bottom = Math.max(row.bottom, rect.bottom);
+        } else rows.push({left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom});
+      }
+    }
+    rows.sort((a, b) => a.top - b.top);
+    document.getElementById(pathId).setAttribute('d', rows.map(row => {
+      const left = row.left - bounds.left;
+      const right = row.right - bounds.left;
+      const bottom = row.bottom - bounds.top + 3;
+      return `M ${left} ${bottom} Q ${(left + right) / 2} ${bottom + 5}, ${right} ${bottom}`;
+    }).join(' '));
+  };
+  const drawLine = (slide, anchor, target, pathId, endOffset = 0) => {
+    const bounds = slide.getBoundingClientRect();
+    const from = anchor.getBoundingClientRect();
+    const to = target.getBoundingClientRect();
+    const mobile = window.innerWidth <= 700;
+    const x1 = mobile ? from.left - bounds.left - 7 : from.right - bounds.left + 8;
+    const y1 = from.top - bounds.top + from.height * .56;
+    const x2 = (mobile ? to.left + 10 : to.left - 8) - bounds.left;
+    const y2 = to.top - bounds.top + Math.min(35, to.height * .24) + endOffset;
+    const bend = mobile ? 18 : x1 + Math.max(40, (x2 - x1) * .5);
+    document.getElementById(pathId).setAttribute('d', `M ${x1} ${y1} C ${bend} ${y1 + 12}, ${bend} ${y2 - 24}, ${x2} ${y2}`);
+  };
+  drawUnderline(serve34, document.getElementById('serve-34-ink'), document.getElementById('faith-underline-anchor'), 'faith-underline');
+  drawLine(serve34, document.getElementById('faith-circle-anchor'), serve34Note.querySelector('.hand-note'), 'faith-connector');
+  drawUnderline(serve58, document.getElementById('serve-58-ink'), document.getElementById('gifts-underline-anchor'), 'gifts-underline');
+  const bodyDrawing = serve58Note.querySelector('.body-drawing');
+  drawLine(serve58, document.getElementById('one-body-anchor'), bodyDrawing, 'body-connector');
+  drawLine(serve58, document.getElementById('grace-given-anchor'), bodyDrawing, 'grace-connector', 38);
+}
+
 function update() {
   ticking = false;
   const raw = progress();
@@ -217,24 +267,39 @@ function update() {
   testingNote.setAttribute('aria-hidden', p < 1.213);
   annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
   livingAnnotation.setAttribute('aria-hidden', p < .94 || p >= 1.08);
-  const passageIndex = p < 1.30 ? -1 : p < 1.65 ? 0 : 1;
+  root.style.setProperty('--serve34-circle', ramp(raw, 1.725, 1.75).toFixed(4));
+  root.style.setProperty('--serve34-underline', ramp(raw, 1.74, 1.765).toFixed(4));
+  root.style.setProperty('--serve34-line', ramp(raw, 1.75, 1.77).toFixed(4));
+  root.style.setProperty('--serve34-note', ramp(raw, 1.765, 1.78).toFixed(4));
+  serve34Note.querySelectorAll('.hand-note span').forEach((line, i) => line.style.setProperty('--line-progress', ramp(raw, 1.77 + i * .004, 1.785 + i * .004).toFixed(4)));
+  root.style.setProperty('--serve58-circle', ramp(raw, 1.905, 1.935).toFixed(4));
+  root.style.setProperty('--serve58-underline', ramp(raw, 1.92, 1.95).toFixed(4));
+  root.style.setProperty('--serve58-line', ramp(raw, 1.94, 1.965).toFixed(4));
+  root.style.setProperty('--serve58-note', ramp(raw, 1.96, 1.975).toFixed(4));
+  root.style.setProperty('--body-drawing-progress', ramp(raw, 1.955, 1.99).toFixed(4));
+  serve58Note.querySelectorAll('.hand-note span').forEach((line, i) => line.style.setProperty('--line-progress', ramp(raw, 1.965 + i * .005, 1.98 + i * .005).toFixed(4)));
+  serve34Note.setAttribute('aria-hidden', raw < 1.765 || raw >= 1.90);
+  serve58Note.setAttribute('aria-hidden', raw < 1.96 || raw >= 2.22);
+  const passageIndex = raw < 1.68 ? -1 : raw < 1.88 ? 0 : raw < 2.20 ? 1 : 2;
   passageSlides.forEach((slide, index) => {
     const opacity = index === 0
-      ? ramp(p, 1.27, 1.34) * (1 - ramp(p, 1.62, 1.67))
-      : ramp(p, 1.62, 1.67);
+      ? ramp(raw, 1.66, 1.71) * (1 - ramp(raw, 1.85, 1.90))
+      : index === 1
+        ? ramp(raw, 1.85, 1.90) * (1 - ramp(raw, 2.17, 2.22))
+        : ramp(raw, 2.17, 2.22);
     slide.style.setProperty('--slide-opacity', opacity.toFixed(4));
     slide.classList.toggle('is-active', index === passageIndex);
     slide.setAttribute('aria-hidden', index !== passageIndex);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : p < 1.67 ? '09' : '10';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.20 ? '09' : '10';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.20 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
   const responsesIsActive = raw >= .85 && raw < 1.02;
   const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
   const focusIsActive = !responsesIsActive && p >= .73 && p < 1.30;
-  const activeTheme = responsesIsActive || p < .73 ? -1 : summaryIsActive || p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
+  const activeTheme = responsesIsActive || p < .73 ? -1 : summaryIsActive || raw < 1.70 ? 0 : raw < 2.20 ? 1 : 2;
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);
     theme.setAttribute('aria-hidden', index !== activeTheme);
@@ -254,7 +319,7 @@ function update() {
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
   if (!copyFeedback) copyButton.textContent = summaryIsActive ? 'COPY SUMMARY' : activeTheme >= 0 && !responsesIsActive ? 'COPY SECTION' : responsesIsActive ? 'COPY RESPONSES' : logicIsActive && !responsesIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', summaryIsActive ? 'Copy body, mind, and allegiance summary' : activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–11', '12–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
+  copyButton.setAttribute('aria-label', summaryIsActive ? 'Copy body, mind, and allegiance summary' : activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
   const navIndex = navButtons.reduce((active, button, index) =>
     raw >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
@@ -264,6 +329,7 @@ function update() {
   });
   drawConnector();
   if (p >= 1.03 && p <= 1.34) drawVerseTwo();
+  if (raw >= 1.63 && raw <= 2.24) drawServeAnnotations();
 }
 
 function scheduleUpdate() {
@@ -284,7 +350,7 @@ function fitHandNotes() {
   scheduleUpdate();
 }
 function fitPassages() {
-  [servePassage, lovePassage].forEach(slide => {
+  [lovePassage].forEach(slide => {
     const reading = slide.querySelector('.passage-reading');
     const textNode = slide.querySelector('.continuous-text');
     const citation = slide.querySelector('.passage-citation');
@@ -309,7 +375,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : [11, 12, 13, 14].includes(index) ? 2400 : quick ? 1100 : 1700;
+  const duration = reducedMotion.matches ? 0 : [11, 12, 13, 14, 17, 19].includes(index) ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -381,7 +447,7 @@ copyButton.addEventListener('click', async () => {
   const raw = progress();
   const p = logicalProgress(raw);
   const summaryIsActive = raw >= 1.53 && raw < 1.70;
-  const theme = summaryIsActive ? null : raw >= 1.02 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
+  const theme = summaryIsActive ? null : raw >= 1.02 ? raw >= 2.20 ? themeLove : raw >= 1.70 ? themeServe : themeWorship : null;
   const source = summaryIsActive ? worshipSummary : raw >= .85 && raw < 1.02 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .40 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
   const text = (theme
     ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
@@ -410,7 +476,7 @@ copyButton.addEventListener('click', async () => {
 
 navButtons.forEach(button => button.addEventListener('click', () => {
   const index = Number(button.dataset.checkpoint);
-  if ([11, 12, 13, 14].includes(index)) {
+  if ([11, 12, 13, 14, 17, 19].includes(index)) {
     ++navigationToken;
     navigating = false;
     const leadIn = checkpoints[index - 1] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight);

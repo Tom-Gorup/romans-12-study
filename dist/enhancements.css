@@ -527,3 +527,54 @@
   .summary-three h3 { font-size:23px; }
   .summary-three p { font-size:13px; }
 }
+
+/* Romans 12:3–8 follows the shared reading and annotation columns in two beats. */
+.serve-slide .passage-frame { position:relative; z-index:1; }
+.serve-slide .passage-reading { grid-column:1; }
+.serve-slide .passage-text { font-size:clamp(27px,2.6vw,36px); line-height:1.22; }
+.serve-gifts .passage-text { font-size:clamp(20px,2vw,28px); line-height:1.2; }
+.serve-annotation { grid-column:2; min-width:0; opacity:var(--serve34-note,0); pointer-events:none; }
+.serve-gifts .serve-annotation { opacity:var(--serve58-note,0); }
+.serve-annotation .hand-note { font-size:clamp(29px,2.9vw,44px); line-height:1.04; }
+.serve-body-note { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+.serve-body-note .hand-note { width:100%; font-size:clamp(27px,2.6vw,40px); }
+.serve-circle-anchor { position:relative; display:inline-block; white-space:nowrap; }
+.serve-circle { position:absolute; z-index:2; left:-8%; top:-18%; width:116%; height:140%; overflow:visible; pointer-events:none; }
+.serve-circle path { fill:none; stroke:var(--orange); stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:100; filter:drop-shadow(0 0 3px rgba(201,109,58,.2)); }
+#faith-circle-anchor .serve-circle path { stroke-dashoffset:calc(100 - var(--serve34-circle,0)*100); opacity:var(--serve34-circle,0); }
+#one-body-anchor .serve-circle path,
+#grace-given-anchor .serve-circle path { stroke-dashoffset:calc(100 - var(--serve58-circle,0)*100); opacity:var(--serve58-circle,0); }
+.serve-ink { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.serve-ink path { fill:none; stroke:var(--orange); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:100; }
+#faith-underline { stroke-dashoffset:calc(100 - var(--serve34-underline,0)*100); opacity:var(--serve34-underline,0); }
+#faith-connector { stroke-dashoffset:calc(100 - var(--serve34-line,0)*100); opacity:var(--serve34-line,0); }
+#gifts-underline { stroke-dashoffset:calc(100 - var(--serve58-underline,0)*100); opacity:var(--serve58-underline,0); }
+#body-connector,#grace-connector { stroke-dashoffset:calc(100 - var(--serve58-line,0)*100); opacity:var(--serve58-line,0); }
+.body-drawing { width:min(190px,62%); height:145px; overflow:visible; fill:none; stroke:var(--orange-light); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; opacity:var(--body-drawing-progress,0); }
+.body-drawing path,.body-drawing circle { stroke-dasharray:400; stroke-dashoffset:calc((1 - var(--body-drawing-progress,0))*400); }
+
+@media(max-width:900px) {
+  .serve-slide .passage-text { font-size:clamp(23px,2.7vw,29px); }
+  .serve-gifts .passage-text { font-size:clamp(18px,2vw,23px); }
+  .serve-annotation .hand-note { font-size:clamp(24px,2.7vw,34px); }
+}
+@media(max-width:700px) {
+  .serve-slide .passage-frame { display:flex; flex-direction:column; justify-content:center; gap:15px; height:100%; }
+  .serve-slide .passage-reading { width:100%; }
+  .serve-slide .passage-text { font-size:clamp(21px,4vw,27px); line-height:1.19; }
+  .serve-gifts .passage-text { font-size:clamp(16px,3vw,19px); line-height:1.17; }
+  .serve-annotation { width:85%; align-self:flex-end; }
+  .serve-annotation .hand-note { font-size:clamp(25px,4.3vw,32px); }
+  .serve-body-note { flex-direction:row; width:100%; gap:8px; }
+  .serve-body-note .body-drawing { width:25%; height:100px; flex:none; }
+  .serve-body-note .hand-note { width:72%; font-size:clamp(20px,3.2vw,27px); }
+  .serve-gifts .passage-citation { margin-top:11px; }
+  #love-passage .passage-text { font-size:15px; line-height:1.14; }
+}
+@media(max-width:450px) {
+  .serve-slide .passage-text { font-size:19px; }
+  .serve-gifts .passage-text { font-size:14px; line-height:1.13; }
+  .serve-slide .passage-frame { gap:10px; }
+  .serve-body-note .body-drawing { height:82px; }
+  #love-passage .passage-text { font-size:13px; line-height:1.12; }
+}
