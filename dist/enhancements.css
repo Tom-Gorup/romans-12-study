@@ -539,7 +539,7 @@
 .serve-body-note { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
 .serve-body-note .hand-note { width:100%; font-size:clamp(27px,2.6vw,40px); }
 .serve-circle-anchor { position:relative; display:inline-block; white-space:nowrap; }
-.serve-circle { position:absolute; z-index:2; left:-8%; top:-18%; width:116%; height:140%; overflow:visible; pointer-events:none; }
+.serve-circle { position:absolute; z-index:2; left:-8%; top:-10%; width:116%; height:120%; overflow:visible; pointer-events:none; }
 .serve-circle path { fill:none; stroke:var(--orange); stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:100; filter:drop-shadow(0 0 3px rgba(201,109,58,.2)); }
 #faith-circle-anchor .serve-circle path { stroke-dashoffset:calc(100 - var(--serve34-circle,0)*100); opacity:var(--serve34-circle,0); }
 #one-body-anchor .serve-circle path,
@@ -561,8 +561,8 @@
 @media(max-width:700px) {
   .serve-slide .passage-frame { display:flex; flex-direction:column; justify-content:center; gap:15px; height:100%; }
   .serve-slide .passage-reading { width:100%; }
-  .serve-slide .passage-text { font-size:clamp(21px,4vw,27px); line-height:1.19; }
-  .serve-gifts .passage-text { font-size:clamp(16px,3vw,19px); line-height:1.17; }
+  .serve-slide .passage-text { font-size:clamp(21px,4vw,27px); line-height:1.3; }
+  .serve-gifts .passage-text { font-size:clamp(16px,3vw,19px); line-height:1.3; }
   .serve-annotation { width:85%; align-self:flex-end; }
   .serve-annotation .hand-note { font-size:clamp(25px,4.3vw,32px); }
   .serve-body-note { flex-direction:row; width:100%; gap:8px; }
