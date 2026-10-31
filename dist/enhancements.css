@@ -372,3 +372,38 @@
   .continuous-passage { inset:17% 7% 9%; }
   .continuous-window { height:47svh; }
 }
+
+/* Opening mark sits at the center of the viewport; the two labels follow below. */
+.intro-inner { position:relative; width:100%; height:100%; transform:none; }
+.intro .therefore-mark { position:absolute; left:50%; top:50%; margin:0; transform:translate(-50%,-50%); }
+.intro-therefore { position:absolute; left:50%; top:calc(50% + 105px); margin:0; transform:translateX(-50%); white-space:nowrap; }
+.intro-title { position:absolute; left:50%; top:calc(50% + clamp(200px,31vh,255px)); transform:translateX(-50%); white-space:nowrap; }
+
+/* Keep the three-dot glyph in its own column as statements wrap. */
+.response-list h3 { display:grid; grid-template-columns:31px minmax(0,1fr); align-items:start; column-gap:13px; }
+.response-list .three-dots { margin:4px 0 0; }
+.response-copy { display:block; min-width:0; }
+.responses-mark.therefore-mark { margin-bottom:28px; }
+
+/* Entire passage fits on one slide, with the same layout for both verse groups. */
+.continuous-passage { inset:18% 7% 11%; }
+.continuous-passage .passage-frame { grid-template-columns:minmax(0,1fr); width:100%; height:100%; max-height:none; }
+.continuous-passage .passage-reading { grid-column:1; height:100%; min-height:0; display:flex; flex-direction:column; justify-content:center; }
+.continuous-window { height:auto; max-height:none; overflow:visible; mask-image:none; }
+.continuous-text { transform:none; will-change:auto; }
+.continuous-passage .passage-text { font-size:clamp(18px,2.1vw,27px); line-height:1.2; letter-spacing:-.015em; }
+.continuous-passage .passage-citation { margin-top:18px; }
+
+@media(max-width:700px) {
+  .continuous-passage { inset:17% 7% 10%; }
+  .continuous-passage .passage-frame { display:block; height:100%; }
+  .continuous-passage .passage-text { font-size:18px; line-height:1.18; }
+  .response-list h3 { grid-template-columns:31px minmax(0,1fr); }
+}
+@media(max-width:450px) {
+  .intro .therefore-mark { top:50%; transform:translate(-50%,-50%) scale(.85); }
+  .intro-therefore { top:calc(50% + 92px); }
+  .intro-title { top:calc(50% + 215px); }
+  .continuous-passage { inset:17% 7% 9%; }
+  .continuous-passage .passage-text { font-size:16px; line-height:1.16; }
+}

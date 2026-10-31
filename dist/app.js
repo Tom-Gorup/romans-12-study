@@ -43,7 +43,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.37, 1.43, 1.49, 1.60, 1.78, 1.93, 2.08, 2.26];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.37, 1.43, 1.49, 1.60, 2];
 const storyEnd = checkpoints[checkpoints.length - 1];
 function logicalProgress(raw) {
   if (raw < .23) return raw;
@@ -216,12 +216,6 @@ function update() {
     slide.classList.toggle('is-active', index === passageIndex);
     slide.setAttribute('aria-hidden', index !== passageIndex);
   });
-  [[servePassage, ramp(p, 1.35, 1.61)], [lovePassage, ramp(p, 1.68, 2)]].forEach(([slide, amount]) => {
-    const windowNode = slide.querySelector('.continuous-window');
-    const textNode = slide.querySelector('.continuous-text');
-    const travel = Math.max(0, textNode.scrollHeight - windowNode.clientHeight + 20);
-    textNode.style.setProperty('--passage-pan', `${(-travel * amount).toFixed(1)}px`);
-  });
   document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : p < 1.30 ? '07' : p < 1.67 ? '08' : '09';
   document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
@@ -250,7 +244,7 @@ function update() {
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
   if (!copyFeedback) copyButton.textContent = activeTheme >= 0 && !responsesIsActive ? 'COPY SECTION' : responsesIsActive ? 'COPY RESPONSES' : logicIsActive && !responsesIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
+  copyButton.setAttribute('aria-label', activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–11', '12–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
   const navIndex = navButtons.reduce((active, button, index) =>
     raw >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
@@ -279,6 +273,20 @@ function fitHandNotes() {
   });
   scheduleUpdate();
 }
+function fitPassages() {
+  [servePassage, lovePassage].forEach(slide => {
+    const reading = slide.querySelector('.passage-reading');
+    const textNode = slide.querySelector('.continuous-text');
+    const citation = slide.querySelector('.passage-citation');
+    textNode.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(textNode).fontSize);
+    const available = reading.clientHeight - citation.offsetHeight - parseFloat(getComputedStyle(citation).marginTop) - 8;
+    while (textNode.scrollHeight > available && size > 13) {
+      size -= .5;
+      textNode.style.fontSize = `${size}px`;
+    }
+  });
+}
 function animateToCheckpoint(index, quick = false) {
   if (navigating && !quick) return;
   const token = ++navigationToken;
@@ -291,7 +299,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : [17, 19, 20].includes(index) ? 3600 : [11, 12, 14, 15].includes(index) ? 2400 : quick ? 1100 : 1700;
+  const duration = reducedMotion.matches ? 0 : [11, 12, 14, 15].includes(index) ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -404,6 +412,7 @@ navButtons.forEach(button => button.addEventListener('click', () => {
 }));
 navButtons.forEach(button => button.addEventListener('mouseleave', () => button.classList.remove('hide-tooltip')));
 
-window.addEventListener('resize', fitHandNotes);
-document.fonts?.ready.then(fitHandNotes);
-fitHandNotes();
+function fitAll() { fitHandNotes(); fitPassages(); }
+window.addEventListener('resize', fitAll);
+document.fonts?.ready.then(fitAll);
+fitAll();
