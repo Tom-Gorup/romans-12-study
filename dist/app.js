@@ -25,7 +25,7 @@ const themeLove = document.getElementById('theme-love');
 const themes = [themeWorship, themeServe, themeLove];
 const passageSlides = [...document.querySelectorAll('.passage-slide')];
 const passageExtension = document.querySelector('.passage-extension');
-const verseTwoSlide = document.querySelector('.passage-two');
+const verseTwoCanvas = focus;
 const verseTwoDrawing = document.getElementById('verse-two-drawing');
 const conformedAnchor = document.getElementById('conformed-anchor');
 const transformedAnchor = document.getElementById('transformed-anchor');
@@ -45,7 +45,6 @@ const ramp = (value, from, to) => clamp((value - from) / (to - from));
 const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .91, 1, 1.11, 1.17, 1.23, 1.34, 1.45, 1.56, 1.67, 1.78, 1.89, 2];
 const storyEnd = checkpoints[checkpoints.length - 1];
 const passageWindows = [
-  [1.03, 1.11, 1.27, 1.34],
   [1.27, 1.34, 1.49, 1.56],
   [1.49, 1.56, 1.60, 1.67],
   [1.60, 1.67, 1.71, 1.78],
@@ -92,7 +91,7 @@ function drawConnector() {
 }
 
 function drawVerseTwo() {
-  const slide = verseTwoSlide.getBoundingClientRect();
+  const slide = verseTwoCanvas.getBoundingClientRect();
   verseTwoDrawing.setAttribute('viewBox', `0 0 ${slide.width} ${slide.height}`);
   const x = value => value - slide.left;
   const y = value => value - slide.top;
@@ -129,12 +128,14 @@ function drawVerseTwo() {
   ).join(' '));
   const mind = mindAnchor.getBoundingClientRect();
   const noteText = testingNote.querySelector('.hand-note').getBoundingClientRect();
-  const x1 = mobile ? x(mind.left) - 7 : x(mind.right) + 8;
+  const noteFirstLine = testingNote.querySelector('.hand-note span').getBoundingClientRect();
+  const x1 = x(mind.right) + 8;
   const y1 = y(mind.top + mind.height * .55);
-  const x2 = x(noteText.left) - 8;
-  const y2 = y(noteText.top + Math.min(24, noteText.height * .18));
+  const x2 = mobile ? x(noteFirstLine.right) + 8 : x(noteText.left) - 8;
+  const y2 = mobile ? y(noteFirstLine.top + noteFirstLine.height * .55) : y(noteText.top + Math.min(24, noteText.height * .18));
+  const rightGutter = slide.width - (window.innerWidth <= 450 ? 20 : 27);
   document.getElementById('testing-connector').setAttribute('d', mobile
-    ? `M ${x1} ${y1} C 12 ${y1 + 16}, 12 ${y2 - 26}, ${x2} ${y2}`
+    ? `M ${x1} ${y1} C ${rightGutter} ${y1 + 16}, ${rightGutter} ${y2 - 26}, ${x2} ${y2}`
     : `M ${x1} ${y1} C ${x1 + 80} ${y1 - 25}, ${x2 - 75} ${y2 - 15}, ${x2} ${y2}`);
 }
 
@@ -169,7 +170,7 @@ function update() {
     panel.setAttribute('aria-hidden', index !== activeLogic || p >= .65);
   });
   logicOverview.classList.toggle('is-summary', p >= .64);
-  root.style.setProperty('--focus-opacity', (focused * (1 - ramp(p, 1, 1.08))).toFixed(4));
+  root.style.setProperty('--focus-opacity', (focused * (1 - ramp(p, 1.27, 1.34))).toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
   const mercyOpacity = 1 - ramp(p, .91, .95);
   root.style.setProperty('--circle', ramp(p, .78, .82).toFixed(4));
@@ -180,7 +181,9 @@ function update() {
   root.style.setProperty('--underline', ramp(p, .9, .91).toFixed(4));
   root.style.setProperty('--living-circle', ramp(p, .92, .95).toFixed(4));
   root.style.setProperty('--living-connector', ramp(p, .95, .97).toFixed(4));
-  root.style.setProperty('--living-opacity', ramp(p, .94, .97).toFixed(4));
+  const verseOneInkOpacity = 1 - ramp(p, 1.04, 1.08);
+  root.style.setProperty('--verse-one-ink-opacity', verseOneInkOpacity.toFixed(4));
+  root.style.setProperty('--living-opacity', (ramp(p, .94, .97) * verseOneInkOpacity).toFixed(4));
   livingNoteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .965 + i * .006, .98 + i * .006).toFixed(4)));
   root.style.setProperty('--living-underline', ramp(p, .99, 1).toFixed(4));
   root.style.setProperty('--conformed-circle', ramp(p, 1.112, 1.13).toFixed(4));
@@ -203,8 +206,8 @@ function update() {
   rangeThree.setAttribute('aria-hidden', expanded);
   rangeThreeFive.setAttribute('aria-hidden', !expanded);
   annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
-  livingAnnotation.setAttribute('aria-hidden', p < .94);
-  const passageIndex = p < 1.08 ? -1 : p < 1.30 ? 0 : p < 1.51 ? 1 : p < 1.62 ? 2 : p < 1.73 ? 3 : p < 1.84 ? 4 : p < 1.95 ? 5 : 6;
+  livingAnnotation.setAttribute('aria-hidden', p < .94 || p >= 1.08);
+  const passageIndex = p < 1.30 ? -1 : p < 1.51 ? 0 : p < 1.62 ? 1 : p < 1.73 ? 2 : p < 1.84 ? 3 : p < 1.95 ? 4 : 5;
   passageSlides.forEach((slide, index) => {
     const [enter, full, leave, gone] = passageWindows[index];
     const opacity = ramp(p, enter, full) * (leave === Infinity ? 1 : 1 - ramp(p, leave, gone));
@@ -217,7 +220,7 @@ function update() {
   const chapterIsActive = p >= .1 && p < .23;
   const mapIsActive = p >= .23 && p < .38;
   const logicIsActive = p >= .38 && p < .73;
-  const focusIsActive = p >= .73 && p < 1.06;
+  const focusIsActive = p >= .73 && p < 1.30;
   const activeTheme = p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);

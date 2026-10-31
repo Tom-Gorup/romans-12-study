@@ -78,14 +78,13 @@
 }
 
 /* Verse 2 builds two notes without putting either note in the copied passage. */
-.verse-two-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 6%; align-items: center; }
 .circle-anchor { position: relative; display: inline-block; white-space: nowrap; }
 .word-circle { position: absolute; z-index: 2; left: -9%; top: -17%; width: 118%; height: 137%; overflow: visible; pointer-events: none; }
 .word-circle path { fill: none; stroke: var(--orange); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; filter: drop-shadow(0 0 3px rgba(201, 109, 58, .22)); }
 #conformed-anchor path { stroke-dashoffset: calc(100 - var(--conformed-circle, 0) * 100); opacity: var(--translation-circle-opacity, 1); }
 #transformed-anchor path { stroke-dashoffset: calc(100 - var(--transformed-circle, 0) * 100); opacity: var(--translation-circle-opacity, 1); }
 #mind-anchor path { stroke-dashoffset: calc(100 - var(--mind-circle, 0) * 100); }
-.verse-two-note-slot { position: relative; min-height: 275px; align-self: center; }
+.verse-two-note-slot { position: absolute; inset: 0; width: 100%; min-height: 0; }
 .verse-two-note { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }
 .translation-note { opacity: var(--translation-note-opacity, 0); }
 .testing-note { opacity: var(--testing-note-opacity, 0); }
@@ -119,8 +118,6 @@
   .section-nav button.nav-major { width: 13px; height: 13px; }
   .section-nav button.nav-minor { width: 6px; height: 6px; }
   .section-nav button.nav-major:not(:first-child) { margin-top: 5px; }
-  .verse-two-layout { grid-template-columns: 1fr; gap: 12px; }
-  .verse-two-note-slot { width: 83%; justify-self: end; min-height: 150px; }
   .verse-two-note { justify-content: flex-start; }
   .verse-two-note .annotation-label { margin-bottom: 5px; font-size: 8px; }
   .verse-two-note .hand-note { font-size: clamp(26px, 4.3vw, 32px); }
@@ -143,7 +140,6 @@
   .logic-conclusion-card p { font-size: 15px; }
   .logic-conclusion-copy h3 { font-size: 31px; margin-bottom: 23px; }
   .logic-conclusion-copy p { font-size: 16px; }
-  .verse-two-note-slot { width: 90%; min-height: 130px; }
   .verse-two-note .hand-note { font-size: 25px; }
 }
 @media (max-height: 650px) {
@@ -192,15 +188,9 @@
 }
 .passage-reading { grid-column: 1; min-width: 0; }
 .passage-reading .passage-body { max-width: none; }
-.passage-two .passage-frame { display: block; }
-.passage-two .verse-two-layout {
-  grid-template-columns: var(--verse-columns);
-  gap: var(--verse-column-gap);
-}
-.passage-two .verse-two-note-slot { min-width: 0; }
 .focus .verse,
+.focus .passage-text,
 .passage-slide .passage-text,
-.passage-two .passage-text,
 .passage-expand .passage-text,
 .passage-group .passage-flow .passage-text,
 .passage-dense .passage-flow .passage-text {
@@ -211,6 +201,9 @@
 .passage-slide .passage-text { margin-bottom: .5em; }
 .passage-slide .passage-text:last-child { margin-bottom: 0; }
 .passage-citation .range-three-five { color: var(--orange-light); }
+.theme-worship .verse-two-scripture { margin: 19px 0 0; }
+.theme-worship .living-circle,
+.theme-worship #living-connector-path { opacity: var(--verse-one-ink-opacity, 1); }
 
 /* Three thematic sections stay in place while their reading beats advance. */
 .theme-section { position: absolute; inset: 0; pointer-events: none; }
@@ -260,22 +253,22 @@
   .annotation-slot { margin-top: 22px; }
   .passage-slide { inset: var(--verse-inset); }
   .passage-slide .passage-frame { display: block; width: 100%; }
-  .passage-two .verse-two-layout { grid-template-columns: 1fr; gap: 14px; }
-  .passage-two .verse-two-note-slot { width: 84%; }
   .verse-reference,
   .passage-citation { margin-top: var(--verse-citation-gap); font-size: 9px; }
   .theme-heading { top: 9%; }
   .theme-heading span { font-size: 8px; }
   .theme-heading h2 { max-width: 95%; font-size: clamp(22px, 4.3vw, 29px); }
+  .theme-worship .annotation-slot { min-height: 180px; }
+  .theme-worship .verse-two-scripture { margin-top: 16px; }
 }
 @media (max-height: 650px) {
   :root { --scripture-size: clamp(21px, 3vw, 29px); }
 }
 @media (max-width: 450px) {
   :root { --scripture-size: 20px; --verse-inset: 9% 7% 9%; }
-  .passage-two .verse-two-note-slot { min-height: 110px; }
   .theme-heading { top: 7%; }
   .theme-heading h2 { font-size: 22px; }
+  .theme-worship .annotation-slot { min-height: 160px; }
 }
 @media (max-width: 450px) and (max-height: 650px) {
   :root { --scripture-size: 18px; }

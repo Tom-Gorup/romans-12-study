@@ -18,4 +18,4 @@ Each section has one persistent title and one large navigation circle. The openi
 | Long passages | Keep the shared type scale and advance through reading beats inside the same theme if the full passage cannot fit. Do not shrink only one beat or introduce a table or divider. |
 | Small screens | Stack the reading and annotation areas. Keep the same 7% side inset and shared mobile scripture size. |
 
-The shared CSS variables and layout rules are in `dist/enhancements.css` under “Shared verse-slide standard.” Use those variables for future changes instead of slide-specific font or positioning overrides. Verses 1–2 share one thematic slide and keep their annotation states. Verses 3–5 keep the expansion animation within the second theme.
+The shared CSS variables and layout rules are in `dist/enhancements.css` under “Shared verse-slide standard.” Use those variables for future changes instead of slide-specific font or positioning overrides. Verses 1–2 appear together on one thematic slide; scrolling advances their annotation states without replacing either verse. Verses 3–5 keep the expansion animation within the second theme.
