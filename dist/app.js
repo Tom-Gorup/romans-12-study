@@ -149,7 +149,7 @@ function update() {
   const logicIn = ramp(p, .35, .42);
   const logicOut = ramp(p, .7, .76);
   const focused = ramp(p, .7, .76);
-  root.style.setProperty('--progress', (p / storyEnd).toFixed(4));
+  root.style.setProperty('--progress', (raw / storyEnd).toFixed(4));
   root.style.setProperty('--intro-opacity', (1 - ramp(p, .04, .11)).toFixed(4));
   root.style.setProperty('--chrome-opacity', ramp(p, .07, .12).toFixed(4));
   root.style.setProperty('--chrome-events', p >= .1 ? 'auto' : 'none');
