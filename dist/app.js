@@ -19,11 +19,25 @@ const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicSummary = document.querySelector('.logic-summary');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
+const passageSlides = [...document.querySelectorAll('.passage-slide')];
+const passageExtension = document.querySelector('.passage-extension');
+const rangeThree = document.querySelector('.range-three');
+const rangeThreeFive = document.querySelector('.range-three-five');
 const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .91, 1];
+const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .91, 1, 1.11, 1.22, 1.33, 1.44, 1.55, 1.66, 1.77, 1.88];
+const storyEnd = checkpoints[checkpoints.length - 1];
+const passageWindows = [
+  [1.03, 1.11, 1.15, 1.22],
+  [1.15, 1.22, 1.37, 1.44],
+  [1.37, 1.44, 1.48, 1.55],
+  [1.48, 1.55, 1.59, 1.66],
+  [1.59, 1.66, 1.70, 1.77],
+  [1.70, 1.77, 1.81, 1.88],
+  [1.81, 1.88, Infinity, Infinity]
+];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -35,7 +49,7 @@ let copyFeedback = false;
 let navigationToken = 0;
 
 function progress() {
-  return clamp((window.scrollY - track.offsetTop) / Math.max(1, track.offsetHeight - window.innerHeight));
+  return clamp((window.scrollY - track.offsetTop) / Math.max(1, track.offsetHeight - window.innerHeight)) * storyEnd;
 }
 
 function drawConnector() {
@@ -71,7 +85,7 @@ function update() {
   const logicIn = ramp(p, .35, .42);
   const logicOut = ramp(p, .7, .76);
   const focused = ramp(p, .7, .76);
-  root.style.setProperty('--progress', p.toFixed(4));
+  root.style.setProperty('--progress', (p / storyEnd).toFixed(4));
   root.style.setProperty('--intro-opacity', (1 - ramp(p, .04, .11)).toFixed(4));
   root.style.setProperty('--chrome-opacity', ramp(p, .07, .12).toFixed(4));
   root.style.setProperty('--chrome-events', p >= .1 ? 'auto' : 'none');
@@ -93,7 +107,7 @@ function update() {
     panel.setAttribute('aria-hidden', index !== activeLogic || p >= .65);
   });
   logicOverview.classList.toggle('is-summary', p >= .64);
-  root.style.setProperty('--focus-opacity', focused.toFixed(4));
+  root.style.setProperty('--focus-opacity', (focused * (1 - ramp(p, 1, 1.08))).toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
   const mercyOpacity = 1 - ramp(p, .91, .95);
   root.style.setProperty('--circle', ramp(p, .78, .82).toFixed(4));
@@ -107,14 +121,27 @@ function update() {
   root.style.setProperty('--living-opacity', ramp(p, .94, .97).toFixed(4));
   livingNoteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .965 + i * .006, .98 + i * .006).toFixed(4)));
   root.style.setProperty('--living-underline', ramp(p, .99, 1).toFixed(4));
+  root.style.setProperty('--expand35', ramp(p, 1.245, 1.32).toFixed(4));
+  const expanded = p >= 1.28;
+  passageExtension.setAttribute('aria-hidden', !expanded);
+  rangeThree.setAttribute('aria-hidden', expanded);
+  rangeThreeFive.setAttribute('aria-hidden', !expanded);
   annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
   livingAnnotation.setAttribute('aria-hidden', p < .94);
-  document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .82 ? '04' : p < .94 ? '05' : '06';
-  document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .82 ? 'VERSE ONE' : p < .94 ? 'MERCIES OF GOD' : 'LIVING SACRIFICE';
+  const passageIndex = p < 1.08 ? -1 : p < 1.18 ? 0 : p < 1.39 ? 1 : p < 1.5 ? 2 : p < 1.61 ? 3 : p < 1.72 ? 4 : p < 1.83 ? 5 : 6;
+  passageSlides.forEach((slide, index) => {
+    const [enter, full, leave, gone] = passageWindows[index];
+    const opacity = ramp(p, enter, full) * (leave === Infinity ? 1 : 1 - ramp(p, leave, gone));
+    slide.style.setProperty('--slide-opacity', opacity.toFixed(4));
+    slide.classList.toggle('is-active', index === passageIndex);
+    slide.setAttribute('aria-hidden', index !== passageIndex);
+  });
+  document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .82 ? '04' : p < .94 ? '05' : p < 1.07 ? '06' : p < 1.18 ? '07' : p < 1.39 ? '08' : p < 1.5 ? '09' : p < 1.61 ? '10' : p < 1.83 ? '11' : '12';
+  document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .82 ? 'VERSE ONE' : p < .94 ? 'MERCIES OF GOD' : p < 1.07 ? 'LIVING SACRIFICE' : p < 1.18 ? 'VERSE TWO' : p < 1.39 ? 'VERSES THREE TO FIVE' : p < 1.5 ? 'GIFTS OF GRACE' : p < 1.61 ? 'GENUINE LOVE' : p < 1.83 ? 'LOVE IN ACTION' : 'OVERCOME EVIL WITH GOOD';
   const chapterIsActive = p >= .1 && p < .23;
   const mapIsActive = p >= .23 && p < .38;
   const logicIsActive = p >= .38 && p < .73;
-  const focusIsActive = p >= .73;
+  const focusIsActive = p >= .73 && p < 1.06;
   overview.classList.toggle('is-active', chapterIsActive);
   bookMap.classList.toggle('is-active', mapIsActive);
   logicOverview.classList.toggle('is-active', logicIsActive);
@@ -125,9 +152,9 @@ function update() {
   logicOverview.setAttribute('aria-hidden', !logicIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
-  if (!copyFeedback) copyButton.textContent = focusIsActive ? 'COPY VERSE' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', focusIsActive ? 'Copy Romans 12 verse 1' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
-  const navIndex = p < .08 ? 0 : p < .2 ? 1 : p < .35 ? 2 : p < .72 ? 3 : p < .82 ? 4 : p < .94 ? 5 : 6;
+  if (!copyFeedback) copyButton.textContent = passageIndex >= 0 ? 'COPY PASSAGE' : focusIsActive ? 'COPY VERSE' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', passageIndex >= 0 ? `Copy Romans 12 ${passageSlides[passageIndex].dataset.passage}` : focusIsActive ? 'Copy Romans 12 verse 1' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
+  const navIndex = p < .08 ? 0 : p < .2 ? 1 : p < .35 ? 2 : p < .72 ? 3 : p < .82 ? 4 : p < .94 ? 5 : p < 1.07 ? 6 : p < 1.18 ? 7 : p < 1.39 ? 8 : p < 1.5 ? 9 : p < 1.61 ? 10 : p < 1.83 ? 11 : 12;
   navButtons.forEach((button, index) => {
     button.classList.toggle('is-active', index === navIndex);
     if (index === navIndex) button.setAttribute('aria-current', 'step');
@@ -145,7 +172,7 @@ function scheduleUpdate() {
 function animateToCheckpoint(index, quick = false) {
   if (navigating && !quick) return;
   const token = ++navigationToken;
-  const target = track.offsetTop + checkpoints[index] * Math.max(1, track.offsetHeight - window.innerHeight);
+  const target = track.offsetTop + checkpoints[index] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight);
   const start = window.scrollY;
   if (Math.abs(target - start) < 2) {
     navigating = false;
@@ -154,7 +181,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : index >= 9 ? 2400 : quick ? 1100 : 1700;
+  const duration = reducedMotion.matches ? 0 : index === 9 || index === 10 ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -224,23 +251,25 @@ window.addEventListener('scroll', () => {
 
 copyButton.addEventListener('click', async () => {
   const p = progress();
-  const source = p >= .73 ? document.querySelector('.verse') : p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
+  const source = p >= 1.08 ? p < 1.28 && p >= 1.18 ? passageSlides[1].querySelector('.passage-verse-three') : passageSlides.find(slide => slide.classList.contains('is-active'))?.querySelector('.passage-body') : p >= .73 ? document.querySelector('.verse') : p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
   const text = source.innerText.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
-  const fallback = document.createElement('textarea');
-  fallback.value = text;
-  fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
-  document.body.appendChild(fallback);
-  fallback.select();
   let copied = false;
-  try { copied = document.execCommand('copy'); } catch { /* Try the Clipboard API next. */ }
-  fallback.remove();
-  copyButton.textContent = copied ? 'COPIED' : 'COPYING…';
   copyFeedback = true;
-  if (!copied && navigator.clipboard?.writeText) {
+  copyButton.textContent = 'COPYING…';
+  if (navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
       copied = true;
-    } catch { /* The button will show the failure below. */ }
+    } catch { /* Try the fallback below. */ }
+  }
+  if (!copied) {
+    const fallback = document.createElement('textarea');
+    fallback.value = text;
+    fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(fallback);
+    fallback.select();
+    try { copied = document.execCommand('copy'); } catch { /* The button will show the failure below. */ }
+    fallback.remove();
   }
   copyButton.textContent = copied ? 'COPIED' : 'COPY FAILED';
   setTimeout(() => { copyFeedback = false; scheduleUpdate(); }, 1800);
@@ -248,10 +277,10 @@ copyButton.addEventListener('click', async () => {
 
 navButtons.forEach(button => button.addEventListener('click', () => {
   const index = Number(button.dataset.checkpoint);
-  if (index >= 9) {
+  if (index === 9 || index === 10) {
     ++navigationToken;
     navigating = false;
-    const leadIn = checkpoints[index - 1] * Math.max(1, track.offsetHeight - window.innerHeight);
+    const leadIn = checkpoints[index - 1] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight);
     window.scrollTo(0, track.offsetTop + leadIn);
     scheduleUpdate();
     requestAnimationFrame(() => animateToCheckpoint(index));
