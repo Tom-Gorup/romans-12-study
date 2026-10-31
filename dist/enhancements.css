@@ -463,3 +463,59 @@
   .logic-conclusion-card .definition-text { margin-top:12px; font-size:15px; line-height:1.27; }
   .logic-conclusion-card blockquote { margin-top:13px; padding-top:10px; font-size:14px; line-height:1.22; }
 }
+
+/* Give the therefore symbol room and center it over the Consecration question. */
+.conclusion-therefore-mark { width:94px; height:76px; margin:0 auto 25px; }
+.conclusion-therefore-mark span { width:22px; height:22px; }
+.conclusion-therefore-mark span:nth-child(1) { left:10px; top:0; }
+.conclusion-therefore-mark span:nth-child(2) { right:10px; top:0; }
+.conclusion-therefore-mark span:nth-child(3) { left:36px; top:48px; }
+
+/* The response symbol stands four text lines above the cards. */
+.responses-mark.therefore-mark { margin:-24px auto clamp(105px,15vh,160px); }
+
+/* Handwritten glyphs have overhangs; reserve space inside the reveal mask. */
+.hand-note span { box-sizing:border-box; width:max-content; max-width:calc(100% - 18px); padding:0 14px 0 8px; margin-left:-8px; }
+.translation-note .annotation-label { box-sizing:border-box; max-width:100%; padding-right:16px; font-size:clamp(8px,.72vw,10px); letter-spacing:.18em; }
+
+/* Both parts of the living-sacrifice phrase point to the same reflection. */
+.body-anchor .living-circle path { stroke-dashoffset:calc(100 - var(--body-circle,0)*100); }
+.theme-worship .body-anchor .living-circle,
+.theme-worship #body-connector-path { opacity:var(--verse-one-ink-opacity,1); }
+#body-connector-path { stroke-dashoffset:calc(100 - var(--body-connector,0)*100); }
+
+/* A summary closes Romans 12:1–2 before the next passage begins. */
+.worship-summary { position:absolute; z-index:7; inset:0; display:grid; place-items:center; padding:9% 7%; box-sizing:border-box; background:#0b0b0a; opacity:var(--worship-summary-opacity,0); pointer-events:none; }
+.worship-summary.is-active { pointer-events:auto; }
+.summary-inner { width:min(1220px,100%); text-align:center; }
+.summary-mark.therefore-mark { transform:scale(.67); transform-origin:center bottom; height:95px; margin:0 auto 12px; }
+.summary-inner h2 { margin:0 0 55px; color:var(--paper); font:400 clamp(42px,5.2vw,76px)/1.03 Georgia,serif; letter-spacing:-.055em; }
+.summary-inner h2 em { color:var(--orange-light); font-weight:400; }
+.summary-three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; text-align:left; }
+.summary-three article { min-height:245px; box-sizing:border-box; padding:31px 28px; border:1px solid #594132; border-top:3px solid var(--orange-light); background:linear-gradient(155deg,#291c15,#13110f); }
+.summary-three article>span { color:var(--orange-light); font:700 10px Arial,sans-serif; letter-spacing:.19em; }
+.summary-three h3 { margin:35px 0 14px; color:var(--paper); font:400 clamp(31px,2.8vw,42px)/1.05 Georgia,serif; letter-spacing:-.035em; }
+.summary-three p { margin:0; color:#c5bbb0; font:18px/1.38 Georgia,serif; }
+@media(max-width:900px) {
+  .summary-inner h2 { margin-bottom:30px; }
+  .summary-three { gap:10px; }
+  .summary-three article { min-height:220px; padding:20px 18px; }
+  .summary-three h3 { margin-top:26px; font-size:30px; }
+  .summary-three p { font-size:16px; }
+}
+@media(max-width:700px) {
+  .responses-mark.therefore-mark { margin-bottom:clamp(75px,11vh,110px); }
+  .summary-three { grid-template-columns:1fr; }
+  .summary-three article { min-height:0; padding:15px 18px; }
+  .summary-three h3 { margin:9px 0 5px; font-size:27px; }
+  .summary-three p { font-size:15px; }
+  .summary-inner h2 { margin-bottom:22px; font-size:clamp(37px,7vw,50px); }
+  .summary-mark.therefore-mark { height:65px; transform:scale(.5); margin-bottom:0; }
+}
+@media(max-width:450px) {
+  .conclusion-therefore-mark { transform:scale(.7); transform-origin:center bottom; height:54px; margin-bottom:10px; }
+  .responses-mark.therefore-mark { margin-bottom:65px; }
+  .summary-three article { padding:11px 14px; }
+  .summary-three h3 { font-size:23px; }
+  .summary-three p { font-size:13px; }
+}

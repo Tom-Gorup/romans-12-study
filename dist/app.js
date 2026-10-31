@@ -3,10 +3,12 @@ const stage = document.querySelector('.stage');
 const anchor = document.getElementById('mercy-anchor');
 const annotation = document.getElementById('annotation');
 const livingAnchor = document.getElementById('living-anchor');
+const bodyAnchor = document.getElementById('body-anchor');
 const livingAnnotation = document.getElementById('living-annotation');
 const connector = document.getElementById('connector');
 const connectorPath = document.getElementById('connector-path');
 const livingConnectorPath = document.getElementById('living-connector-path');
+const bodyConnectorPath = document.getElementById('body-connector-path');
 const noteLines = [...annotation.querySelectorAll('.hand-note span')];
 const livingNoteLines = [...livingAnnotation.querySelectorAll('.hand-note span')];
 const intro = document.getElementById('intro');
@@ -19,6 +21,7 @@ const flowSteps = [...document.querySelectorAll('.flow-step')];
 const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicConclusion = document.querySelector('.logic-conclusion');
 const responsesOverview = document.getElementById('responses-overview');
+const worshipSummary = document.getElementById('worship-summary');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
 const themeWorship = document.getElementById('theme-worship');
@@ -43,7 +46,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.37, 1.43, 1.49, 1.60, 2];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 2.12];
 const storyEnd = checkpoints[checkpoints.length - 1];
 function logicalProgress(raw) {
   if (raw < .23) return raw;
@@ -69,21 +72,21 @@ function progress() {
 function drawConnector() {
   const s = stage.getBoundingClientRect();
   connector.setAttribute('viewBox', `0 0 ${s.width} ${s.height}`);
-  [[anchor, annotation, connectorPath], [livingAnchor, livingAnnotation, livingConnectorPath]].forEach(([from, to, path]) => {
+  [[anchor, annotation, connectorPath, 0], [livingAnchor, livingAnnotation, livingConnectorPath, 0], [bodyAnchor, livingAnnotation, bodyConnectorPath, 30]].forEach(([from, to, path, endOffset]) => {
     const a = from.getBoundingClientRect();
     const n = to.getBoundingClientRect();
     if (window.innerWidth <= 700) {
       const x1 = a.left - s.left - 7;
       const y1 = a.top - s.top + a.height * .55;
       const x2 = n.left - s.left + 10;
-      const y2 = n.top - s.top + 12;
+      const y2 = n.top - s.top + 12 + endOffset;
       const gutter = window.innerWidth <= 450 ? 19 : 29;
       path.setAttribute('d', `M ${x1} ${y1} C ${gutter} ${y1 + 10}, ${gutter} ${y1 + 35}, ${gutter} ${y2 - 34} C ${gutter} ${y2 - 10}, ${x2 - 28} ${y2 - 12}, ${x2} ${y2}`);
     } else {
       const x1 = a.right - s.left + 8;
       const y1 = a.top - s.top + a.height * .65;
       const x2 = n.left - s.left + 5;
-      const y2 = n.top - s.top + Math.min(72, n.height * .22);
+      const y2 = n.top - s.top + Math.min(72, n.height * .22) + endOffset;
       const mid = x1 + Math.max(35, (x2 - x1) * .52);
       path.setAttribute('d', `M ${x1} ${y1} C ${mid} ${y1 + 24}, ${mid - 20} ${y2 - 30}, ${x2} ${y2}`);
     }
@@ -186,6 +189,8 @@ function update() {
   root.style.setProperty('--underline', ramp(p, .9, .91).toFixed(4));
   root.style.setProperty('--living-circle', ramp(p, .92, .95).toFixed(4));
   root.style.setProperty('--living-connector', ramp(p, .95, .97).toFixed(4));
+  root.style.setProperty('--body-circle', ramp(p, .915, .945).toFixed(4));
+  root.style.setProperty('--body-connector', ramp(p, .945, .965).toFixed(4));
   const verseOneInkOpacity = 1 - ramp(p, 1.04, 1.08);
   root.style.setProperty('--verse-one-ink-opacity', verseOneInkOpacity.toFixed(4));
   root.style.setProperty('--living-opacity', (ramp(p, .94, .97) * verseOneInkOpacity).toFixed(4));
@@ -203,6 +208,11 @@ function update() {
   root.style.setProperty('--testing-line', ramp(p, 1.203, 1.216).toFixed(4));
   root.style.setProperty('--testing-note-opacity', ramp(p, 1.213, 1.227).toFixed(4));
   testingLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, 1.213 + i * .003, 1.220 + i * .003).toFixed(4)));
+  const worshipSummaryOpacity = ramp(raw, 1.53, 1.58) * (1 - ramp(raw, 1.65, 1.70));
+  root.style.setProperty('--worship-summary-opacity', worshipSummaryOpacity.toFixed(4));
+  const summaryIsActive = raw >= 1.53 && raw < 1.70;
+  worshipSummary.classList.toggle('is-active', summaryIsActive);
+  worshipSummary.setAttribute('aria-hidden', !summaryIsActive);
   translationNote.setAttribute('aria-hidden', p < 1.148 || p >= 1.187);
   testingNote.setAttribute('aria-hidden', p < 1.213);
   annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
@@ -216,15 +226,15 @@ function update() {
     slide.classList.toggle('is-active', index === passageIndex);
     slide.setAttribute('aria-hidden', index !== passageIndex);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : p < 1.30 ? '07' : p < 1.67 ? '08' : '09';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : p < 1.67 ? '09' : '10';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
   const responsesIsActive = raw >= .85 && raw < 1.02;
   const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
   const focusIsActive = !responsesIsActive && p >= .73 && p < 1.30;
-  const activeTheme = responsesIsActive || p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
+  const activeTheme = responsesIsActive || p < .73 ? -1 : summaryIsActive || p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);
     theme.setAttribute('aria-hidden', index !== activeTheme);
@@ -243,8 +253,8 @@ function update() {
   responsesOverview.setAttribute('aria-hidden', !responsesIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
-  if (!copyFeedback) copyButton.textContent = activeTheme >= 0 && !responsesIsActive ? 'COPY SECTION' : responsesIsActive ? 'COPY RESPONSES' : logicIsActive && !responsesIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–11', '12–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
+  if (!copyFeedback) copyButton.textContent = summaryIsActive ? 'COPY SUMMARY' : activeTheme >= 0 && !responsesIsActive ? 'COPY SECTION' : responsesIsActive ? 'COPY RESPONSES' : logicIsActive && !responsesIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', summaryIsActive ? 'Copy body, mind, and allegiance summary' : activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–11', '12–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
   const navIndex = navButtons.reduce((active, button, index) =>
     raw >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
@@ -299,7 +309,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : [11, 12, 14, 15].includes(index) ? 2400 : quick ? 1100 : 1700;
+  const duration = reducedMotion.matches ? 0 : [11, 12, 13, 14].includes(index) ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -370,8 +380,9 @@ window.addEventListener('scroll', () => {
 copyButton.addEventListener('click', async () => {
   const raw = progress();
   const p = logicalProgress(raw);
-  const theme = raw >= 1.02 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
-  const source = raw >= .85 && raw < 1.02 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .40 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
+  const summaryIsActive = raw >= 1.53 && raw < 1.70;
+  const theme = summaryIsActive ? null : raw >= 1.02 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
+  const source = summaryIsActive ? worshipSummary : raw >= .85 && raw < 1.02 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .40 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
   const text = (theme
     ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
     : source.innerText).replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
@@ -399,7 +410,7 @@ copyButton.addEventListener('click', async () => {
 
 navButtons.forEach(button => button.addEventListener('click', () => {
   const index = Number(button.dataset.checkpoint);
-  if ([11, 12, 14, 15].includes(index)) {
+  if ([11, 12, 13, 14].includes(index)) {
     ++navigationToken;
     navigating = false;
     const leadIn = checkpoints[index - 1] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight);
