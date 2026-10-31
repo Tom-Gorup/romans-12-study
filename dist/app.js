@@ -5,10 +5,25 @@ const annotation = document.getElementById('annotation');
 const connector = document.getElementById('connector');
 const connectorPath = document.getElementById('connector-path');
 const noteLines = [...document.querySelectorAll('.hand-note span')];
+const overview = document.getElementById('overview');
+const focus = document.getElementById('focus');
+const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
+const checkpoints = [0, .38, .66, 1];
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
+let navigating = false;
+let wheelLockUntil = 0;
+let wheelCarry = 0;
+let lastWheelAt = 0;
+let snapTimer;
+let copyFeedback = false;
+
+function progress() {
+  return clamp((window.scrollY - track.offsetTop) / Math.max(1, track.offsetHeight - window.innerHeight));
+}
 
 function drawConnector() {
   const a = anchor.getBoundingClientRect();
@@ -25,8 +40,7 @@ function drawConnector() {
 
 function update() {
   ticking = false;
-  const total = Math.max(1, track.offsetHeight - window.innerHeight);
-  const p = clamp((window.scrollY - track.offsetTop) / total);
+  const p = progress();
   const zoom = ramp(p, .08, .31);
   const focused = ramp(p, .16, .35);
   root.style.setProperty('--progress', p.toFixed(4));
@@ -41,6 +55,11 @@ function update() {
   root.style.setProperty('--underline', ramp(p, .91, .98).toFixed(4));
   document.getElementById('stage-number').textContent = p < .25 ? '01' : p < .6 ? '02' : '03';
   document.getElementById('progress-copy').textContent = p < .25 ? 'THE WHOLE CHAPTER' : p < .6 ? 'VERSE ONE' : 'MERCIES OF GOD';
+  const chapterIsActive = p < .3;
+  overview.classList.toggle('is-active', chapterIsActive);
+  focus.classList.toggle('is-active', !chapterIsActive);
+  if (!copyFeedback) copyButton.textContent = chapterIsActive ? 'COPY CHAPTER' : 'COPY VERSE';
+  copyButton.setAttribute('aria-label', chapterIsActive ? 'Copy Romans 12' : 'Copy Romans 12 verse 1');
   drawConnector();
 }
 
@@ -50,7 +69,100 @@ function scheduleUpdate() {
     requestAnimationFrame(update);
   }
 }
-window.addEventListener('scroll', scheduleUpdate, {passive:true});
+function animateToCheckpoint(index) {
+  if (navigating) return;
+  const target = track.offsetTop + checkpoints[index] * Math.max(1, track.offsetHeight - window.innerHeight);
+  const start = window.scrollY;
+  if (Math.abs(target - start) < 2) return;
+  clearTimeout(snapTimer);
+  navigating = true;
+  const duration = reducedMotion.matches ? 0 : index === checkpoints.length - 1 ? 2200 : 1700;
+  const startTime = performance.now();
+
+  function frame(now) {
+    const t = duration ? clamp((now - startTime) / duration) : 1;
+    const eased = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    window.scrollTo(0, start + (target - start) * eased);
+    if (t < 1) requestAnimationFrame(frame);
+    else {
+      navigating = false;
+      wheelLockUntil = now + 350;
+      scheduleUpdate();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function step(direction) {
+  if (navigating || performance.now() < wheelLockUntil) return;
+  const p = progress();
+  const index = direction > 0
+    ? checkpoints.findIndex(point => point > p + .02)
+    : checkpoints.findLastIndex(point => point < p - .02);
+  if (index >= 0) animateToCheckpoint(index);
+}
+
+window.addEventListener('wheel', event => {
+  if (event.ctrlKey || event.metaKey) return;
+  event.preventDefault();
+  if (navigating || performance.now() < wheelLockUntil) return;
+  const now = performance.now();
+  if (now - lastWheelAt > 180) wheelCarry = 0;
+  lastWheelAt = now;
+  const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+  wheelCarry += event.deltaY * multiplier;
+  if (Math.abs(wheelCarry) > 24) {
+    step(Math.sign(wheelCarry));
+    wheelCarry = 0;
+  }
+}, {passive:false});
+
+window.addEventListener('keydown', event => {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, [contenteditable]')) return;
+  if (event.target.closest('button') && (event.key === ' ' || event.key === 'Enter')) return;
+  if (window.getSelection()?.toString()) return;
+  const forward = ['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(event.key) && !(event.key === ' ' && event.shiftKey);
+  const backward = ['ArrowUp', 'ArrowLeft', 'PageUp'].includes(event.key) || (event.key === ' ' && event.shiftKey);
+  if (forward || backward) {
+    event.preventDefault();
+    step(forward ? 1 : -1);
+  } else if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    animateToCheckpoint(event.key === 'Home' ? 0 : checkpoints.length - 1);
+  }
+});
+
+window.addEventListener('scroll', () => {
+  scheduleUpdate();
+  if (navigating || window.getSelection()?.toString()) return;
+  clearTimeout(snapTimer);
+  snapTimer = setTimeout(() => {
+    const p = progress();
+    const nearest = checkpoints.reduce((best, point, index) => Math.abs(point - p) < Math.abs(checkpoints[best] - p) ? index : best, 0);
+    if (Math.abs(checkpoints[nearest] - p) > .012) animateToCheckpoint(nearest);
+  }, 260);
+}, {passive:true});
+
+copyButton.addEventListener('click', async () => {
+  const source = progress() < .3 ? document.querySelector('.chapter-text') : document.querySelector('.verse');
+  const text = source.innerText.replace(/\s+/g, ' ').trim();
+  try {
+    await navigator.clipboard.writeText(text);
+    copyButton.textContent = 'COPIED';
+  } catch {
+    const fallback = document.createElement('textarea');
+    fallback.value = text;
+    fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(fallback);
+    fallback.select();
+    const copied = document.execCommand('copy');
+    fallback.remove();
+    copyButton.textContent = copied ? 'COPIED' : 'COPY FAILED';
+  }
+  copyFeedback = true;
+  setTimeout(() => { copyFeedback = false; scheduleUpdate(); }, 1800);
+});
+
 window.addEventListener('resize', scheduleUpdate);
 document.fonts?.ready.then(scheduleUpdate);
 scheduleUpdate();

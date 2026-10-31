@@ -8,7 +8,7 @@ A scroll-driven first pass at a Bible study presentation. It opens on all of Rom
 python3 -m http.server 8765 --directory dist
 ```
 
-Open `http://localhost:8765/` and scroll. The source is buildless HTML, CSS, and JavaScript in `dist/`.
+Open `http://localhost:8765/`. Scroll or press the right/down arrows to move through four pause points; left/up moves backward. Each transition eases through the drawing. Text can be selected normally, and the footer button copies the chapter or verse 1. The source is buildless HTML, CSS, and JavaScript in `dist/`.
 
 ## Sequence
 
