@@ -2,14 +2,20 @@ const track = document.getElementById('presentation');
 const stage = document.querySelector('.stage');
 const anchor = document.getElementById('mercy-anchor');
 const annotation = document.getElementById('annotation');
+const livingAnchor = document.getElementById('living-anchor');
+const livingAnnotation = document.getElementById('living-annotation');
 const connector = document.getElementById('connector');
 const connectorPath = document.getElementById('connector-path');
-const noteLines = [...document.querySelectorAll('.hand-note span')];
+const livingConnectorPath = document.getElementById('living-connector-path');
+const noteLines = [...annotation.querySelectorAll('.hand-note span')];
+const livingNoteLines = [...livingAnnotation.querySelectorAll('.hand-note span')];
 const intro = document.getElementById('intro');
 const overview = document.getElementById('overview');
 const bookMap = document.getElementById('book-map');
 const logicOverview = document.getElementById('logic-overview');
 const logicCards = [...document.querySelectorAll('.logic-card')];
+const flowSteps = [...document.querySelectorAll('.flow-step')];
+const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicSummary = document.querySelector('.logic-summary');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
@@ -17,7 +23,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .87, 1];
+const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .85, .91, 1];
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -33,16 +39,26 @@ function progress() {
 }
 
 function drawConnector() {
-  const a = anchor.getBoundingClientRect();
-  const n = annotation.getBoundingClientRect();
   const s = stage.getBoundingClientRect();
-  const x1 = a.right - s.left + 8;
-  const y1 = a.top - s.top + a.height * .65;
-  const x2 = n.left - s.left + 5;
-  const y2 = n.top - s.top + Math.min(72, n.height * .22);
-  const mid = x1 + Math.max(35, (x2 - x1) * .52);
   connector.setAttribute('viewBox', `0 0 ${s.width} ${s.height}`);
-  connectorPath.setAttribute('d', `M ${x1} ${y1} C ${mid} ${y1 + 24}, ${mid - 20} ${y2 - 30}, ${x2} ${y2}`);
+  [[anchor, annotation, connectorPath], [livingAnchor, livingAnnotation, livingConnectorPath]].forEach(([from, to, path]) => {
+    const a = from.getBoundingClientRect();
+    const n = to.getBoundingClientRect();
+    if (window.innerWidth <= 700) {
+      const x1 = a.left - s.left + a.width * .6;
+      const y1 = a.bottom - s.top + 7;
+      const x2 = n.left - s.left + 10;
+      const y2 = n.top - s.top + 12;
+      path.setAttribute('d', `M ${x1} ${y1} C ${x1 + 10} ${y1 + 45}, ${x2 - 22} ${y2 - 25}, ${x2} ${y2}`);
+    } else {
+      const x1 = a.right - s.left + 8;
+      const y1 = a.top - s.top + a.height * .65;
+      const x2 = n.left - s.left + 5;
+      const y2 = n.top - s.top + Math.min(72, n.height * .22);
+      const mid = x1 + Math.max(35, (x2 - x1) * .52);
+      path.setAttribute('d', `M ${x1} ${y1} C ${mid} ${y1 + 24}, ${mid - 20} ${y2 - 30}, ${x2} ${y2}`);
+    }
+  });
 }
 
 function update() {
@@ -65,19 +81,34 @@ function update() {
   root.style.setProperty('--map-scale', (.84 + mapIn * .16 + mapOut * .42).toFixed(4));
   root.style.setProperty('--logic-opacity', (logicIn * (1 - logicOut)).toFixed(4));
   root.style.setProperty('--logic-scale', (.87 + logicIn * .13 + logicOut * .38).toFixed(4));
-  root.style.setProperty('--summary-opacity', (ramp(p, .63, .67) * (1 - logicOut)).toFixed(4));
-  logicSummary.setAttribute('aria-hidden', p < .63);
+  root.style.setProperty('--quote-opacity', (ramp(p, .4, .42) * (1 - ramp(p, .63, .66)) * (1 - logicOut)).toFixed(4));
+  root.style.setProperty('--summary-opacity', (ramp(p, .64, .67) * (1 - logicOut)).toFixed(4));
+  logicSummary.setAttribute('aria-hidden', p < .65);
   const activeLogic = p < .45 ? 0 : p < .51 ? 1 : p < .57 ? 2 : 3;
   logicCards.forEach((card, index) => card.classList.toggle('is-current', index === activeLogic));
+  flowSteps.forEach((step, index) => step.classList.toggle('is-complete', index <= activeLogic));
+  quotePanels.forEach((panel, index) => {
+    panel.classList.toggle('is-current', index === activeLogic);
+    panel.setAttribute('aria-hidden', index !== activeLogic || p >= .65);
+  });
   logicOverview.classList.toggle('is-summary', p >= .64);
   root.style.setProperty('--focus-opacity', focused.toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
-  root.style.setProperty('--circle', ramp(p, .82, .87).toFixed(4));
-  root.style.setProperty('--connector', ramp(p, .87, .91).toFixed(4));
-  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .9 + i * .018, .94 + i * .013).toFixed(4)));
-  root.style.setProperty('--underline', ramp(p, .98, 1).toFixed(4));
-  document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .9 ? '04' : '05';
-  document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .9 ? 'VERSE ONE' : 'MERCIES OF GOD';
+  const mercyOpacity = 1 - ramp(p, .91, .95);
+  root.style.setProperty('--circle', ramp(p, .78, .82).toFixed(4));
+  root.style.setProperty('--connector', ramp(p, .82, .85).toFixed(4));
+  root.style.setProperty('--mercy-opacity', mercyOpacity.toFixed(4));
+  noteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .85 + i * .008, .875 + i * .008).toFixed(4)));
+  root.style.setProperty('--underline', ramp(p, .9, .91).toFixed(4));
+  root.style.setProperty('--living-circle', ramp(p, .92, .95).toFixed(4));
+  root.style.setProperty('--living-connector', ramp(p, .95, .97).toFixed(4));
+  root.style.setProperty('--living-opacity', ramp(p, .94, .97).toFixed(4));
+  livingNoteLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, .965 + i * .006, .98 + i * .006).toFixed(4)));
+  root.style.setProperty('--living-underline', ramp(p, .99, 1).toFixed(4));
+  annotation.setAttribute('aria-hidden', p >= .95);
+  livingAnnotation.setAttribute('aria-hidden', p < .94);
+  document.getElementById('stage-number').textContent = p < .2 ? '01' : p < .35 ? '02' : p < .72 ? '03' : p < .82 ? '04' : p < .94 ? '05' : '06';
+  document.getElementById('progress-copy').textContent = p < .2 ? 'THE WHOLE CHAPTER' : p < .35 ? 'THE WHOLE LETTER' : p < .72 ? 'THE GOSPEL’S LOGIC' : p < .82 ? 'VERSE ONE' : p < .94 ? 'MERCIES OF GOD' : 'LIVING SACRIFICE';
   const chapterIsActive = p >= .1 && p < .23;
   const mapIsActive = p >= .23 && p < .38;
   const logicIsActive = p >= .38 && p < .73;
@@ -94,7 +125,7 @@ function update() {
   copyButton.disabled = p < .1;
   if (!copyFeedback) copyButton.textContent = focusIsActive ? 'COPY VERSE' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
   copyButton.setAttribute('aria-label', focusIsActive ? 'Copy Romans 12 verse 1' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
-  const navIndex = p < .08 ? 0 : p < .2 ? 1 : p < .35 ? 2 : p < .72 ? 3 : p < .9 ? 4 : 5;
+  const navIndex = p < .08 ? 0 : p < .2 ? 1 : p < .35 ? 2 : p < .72 ? 3 : p < .82 ? 4 : p < .94 ? 5 : 6;
   navButtons.forEach((button, index) => {
     button.classList.toggle('is-active', index === navIndex);
     if (index === navIndex) button.setAttribute('aria-current', 'step');
@@ -192,7 +223,7 @@ window.addEventListener('scroll', () => {
 copyButton.addEventListener('click', async () => {
   const p = progress();
   const source = p >= .73 ? document.querySelector('.verse') : p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
-  const text = source.innerText.replace(/\s+/g, ' ').trim();
+  const text = source.innerText.replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
   const fallback = document.createElement('textarea');
   fallback.value = text;
   fallback.style.cssText = 'position:fixed;left:-9999px;top:0';
