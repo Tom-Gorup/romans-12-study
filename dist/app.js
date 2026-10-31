@@ -11,12 +11,14 @@ const noteLines = [...annotation.querySelectorAll('.hand-note span')];
 const livingNoteLines = [...livingAnnotation.querySelectorAll('.hand-note span')];
 const intro = document.getElementById('intro');
 const overview = document.getElementById('overview');
+const romansBackground = document.getElementById('romans-background');
 const bookMap = document.getElementById('book-map');
 const logicOverview = document.getElementById('logic-overview');
 const logicCards = [...document.querySelectorAll('.logic-card')];
 const flowSteps = [...document.querySelectorAll('.flow-step')];
 const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicConclusion = document.querySelector('.logic-conclusion');
+const responsesOverview = document.getElementById('responses-overview');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
 const themeWorship = document.getElementById('theme-worship');
@@ -24,7 +26,8 @@ const themeServe = document.getElementById('theme-serve');
 const themeLove = document.getElementById('theme-love');
 const themes = [themeWorship, themeServe, themeLove];
 const passageSlides = [...document.querySelectorAll('.passage-slide')];
-const passageExtension = document.querySelector('.passage-extension');
+const servePassage = document.getElementById('serve-passage');
+const lovePassage = document.getElementById('love-passage');
 const verseTwoCanvas = focus;
 const verseTwoDrawing = document.getElementById('verse-two-drawing');
 const conformedAnchor = document.getElementById('conformed-anchor');
@@ -36,22 +39,19 @@ const testingNote = document.getElementById('testing-note');
 const translationLines = [...translationNote.querySelectorAll('.hand-note span')];
 const testingLines = [...testingNote.querySelectorAll('.hand-note span')];
 const handNotes = [...document.querySelectorAll('.hand-note')];
-const rangeThree = document.querySelector('.range-three');
-const rangeThreeFive = document.querySelector('.range-three-five');
 const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .42, .48, .54, .6, .67, .76, .91, 1, 1.11, 1.17, 1.23, 1.34, 1.45, 1.56, 1.67, 1.78, 1.89, 2];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.37, 1.43, 1.49, 1.60, 1.78, 1.93, 2.08, 2.26];
 const storyEnd = checkpoints[checkpoints.length - 1];
-const passageWindows = [
-  [1.27, 1.34, 1.49, 1.56],
-  [1.49, 1.56, 1.60, 1.67],
-  [1.60, 1.67, 1.71, 1.78],
-  [1.71, 1.78, 1.82, 1.89],
-  [1.82, 1.89, 1.93, 2],
-  [1.93, 2, Infinity, Infinity]
-];
+function logicalProgress(raw) {
+  if (raw < .23) return raw;
+  if (raw < .36) return .23;
+  if (raw < .85) return raw - .13;
+  if (raw < .98) return .72;
+  return raw - .26;
+}
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ticking = false;
 let navigating = false;
@@ -141,7 +141,8 @@ function drawVerseTwo() {
 
 function update() {
   ticking = false;
-  const p = progress();
+  const raw = progress();
+  const p = logicalProgress(raw);
   const pullBack = ramp(p, .19, .28);
   const mapIn = ramp(p, .21, .28);
   const mapOut = ramp(p, .34, .42);
@@ -152,6 +153,10 @@ function update() {
   root.style.setProperty('--intro-opacity', (1 - ramp(p, .04, .11)).toFixed(4));
   root.style.setProperty('--chrome-opacity', ramp(p, .07, .12).toFixed(4));
   root.style.setProperty('--chrome-events', p >= .1 ? 'auto' : 'none');
+  const backgroundOpacity = ramp(raw, .23, .26) * (1 - ramp(raw, .33, .36));
+  root.style.setProperty('--background-opacity', backgroundOpacity.toFixed(4));
+  const responsesOpacity = ramp(raw, .85, .88) * (1 - ramp(raw, .95, .98));
+  root.style.setProperty('--responses-opacity', responsesOpacity.toFixed(4));
   root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(p, .2, .28))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
   root.style.setProperty('--overview-scale', (overviewFit * (1 - pullBack * .58)).toFixed(4));
@@ -159,17 +164,17 @@ function update() {
   root.style.setProperty('--map-scale', (.84 + mapIn * .16 + mapOut * .42).toFixed(4));
   root.style.setProperty('--logic-opacity', (logicIn * (1 - logicOut)).toFixed(4));
   root.style.setProperty('--logic-scale', (.87 + logicIn * .13 + logicOut * .38).toFixed(4));
-  root.style.setProperty('--quote-opacity', (ramp(p, .4, .42) * (1 - ramp(p, .63, .66)) * (1 - logicOut)).toFixed(4));
-  root.style.setProperty('--summary-opacity', (ramp(p, .64, .67) * (1 - logicOut)).toFixed(4));
-  logicConclusion.setAttribute('aria-hidden', p < .65);
-  const activeLogic = p < .45 ? 0 : p < .51 ? 1 : p < .57 ? 2 : 3;
+  root.style.setProperty('--quote-opacity', (ramp(p, .4, .42) * (1 - ramp(p, .59, .61)) * (1 - logicOut)).toFixed(4));
+  root.style.setProperty('--summary-opacity', (ramp(p, .59, .61) * (1 - logicOut)).toFixed(4));
+  logicConclusion.setAttribute('aria-hidden', p < .60);
+  const activeLogic = p < .45 ? 0 : p < .51 ? 1 : p < .59 ? 2 : -1;
   logicCards.forEach((card, index) => card.classList.toggle('is-current', index === activeLogic));
   flowSteps.forEach((step, index) => step.classList.toggle('is-complete', index <= activeLogic));
   quotePanels.forEach((panel, index) => {
     panel.classList.toggle('is-current', index === activeLogic);
-    panel.setAttribute('aria-hidden', index !== activeLogic || p >= .65);
+    panel.setAttribute('aria-hidden', index !== activeLogic || p >= .59);
   });
-  logicOverview.classList.toggle('is-summary', p >= .64);
+  logicOverview.classList.toggle('is-summary', p >= .59);
   root.style.setProperty('--focus-opacity', (focused * (1 - ramp(p, 1.27, 1.34))).toFixed(4));
   root.style.setProperty('--focus-scale', (.86 + focused * .14).toFixed(4));
   const mercyOpacity = 1 - ramp(p, .91, .95);
@@ -200,46 +205,54 @@ function update() {
   testingLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, 1.213 + i * .003, 1.220 + i * .003).toFixed(4)));
   translationNote.setAttribute('aria-hidden', p < 1.148 || p >= 1.187);
   testingNote.setAttribute('aria-hidden', p < 1.213);
-  root.style.setProperty('--expand35', ramp(p, 1.365, 1.44).toFixed(4));
-  const expanded = p >= 1.4;
-  passageExtension.setAttribute('aria-hidden', !expanded);
-  rangeThree.setAttribute('aria-hidden', expanded);
-  rangeThreeFive.setAttribute('aria-hidden', !expanded);
   annotation.setAttribute('aria-hidden', p < .85 || p >= .95);
   livingAnnotation.setAttribute('aria-hidden', p < .94 || p >= 1.08);
-  const passageIndex = p < 1.30 ? -1 : p < 1.51 ? 0 : p < 1.62 ? 1 : p < 1.73 ? 2 : p < 1.84 ? 3 : p < 1.95 ? 4 : 5;
+  const passageIndex = p < 1.30 ? -1 : p < 1.65 ? 0 : 1;
   passageSlides.forEach((slide, index) => {
-    const [enter, full, leave, gone] = passageWindows[index];
-    const opacity = ramp(p, enter, full) * (leave === Infinity ? 1 : 1 - ramp(p, leave, gone));
+    const opacity = index === 0
+      ? ramp(p, 1.27, 1.34) * (1 - ramp(p, 1.62, 1.67))
+      : ramp(p, 1.62, 1.67);
     slide.style.setProperty('--slide-opacity', opacity.toFixed(4));
     slide.classList.toggle('is-active', index === passageIndex);
     slide.setAttribute('aria-hidden', index !== passageIndex);
   });
-  document.getElementById('stage-number').textContent = p < .08 ? '01' : p < .2 ? '02' : p < .35 ? '03' : p < .73 ? '04' : p < 1.30 ? '05' : p < 1.67 ? '06' : '07';
-  document.getElementById('progress-copy').textContent = p < .2 ? 'ROMANS 12' : p < .35 ? 'THE WHOLE LETTER' : p < .73 ? 'THE GOSPEL’S LOGIC' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
+  [[servePassage, ramp(p, 1.35, 1.61)], [lovePassage, ramp(p, 1.68, 2)]].forEach(([slide, amount]) => {
+    const windowNode = slide.querySelector('.continuous-window');
+    const textNode = slide.querySelector('.continuous-text');
+    const travel = Math.max(0, textNode.scrollHeight - windowNode.clientHeight + 20);
+    textNode.style.setProperty('--passage-pan', `${(-travel * amount).toFixed(1)}px`);
+  });
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .36 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < .98 ? '06' : p < 1.30 ? '07' : p < 1.67 ? '08' : '09';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .36 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < .98 ? 'THREE RESPONSES' : p < 1.30 ? 'THEREFORE / WORSHIP' : p < 1.67 ? 'THEREFORE / SERVE' : 'THEREFORE / LOVE';
   const chapterIsActive = p >= .1 && p < .23;
-  const mapIsActive = p >= .23 && p < .38;
-  const logicIsActive = p >= .38 && p < .73;
-  const focusIsActive = p >= .73 && p < 1.30;
+  const backgroundIsActive = raw >= .23 && raw < .36;
+  const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
+  const responsesIsActive = raw >= .85 && raw < .98;
+  const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
+  const focusIsActive = !responsesIsActive && p >= .73 && p < 1.30;
   const activeTheme = p < .73 ? -1 : p < 1.30 ? 0 : p < 1.67 ? 1 : 2;
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);
     theme.setAttribute('aria-hidden', index !== activeTheme);
   });
   overview.classList.toggle('is-active', chapterIsActive);
+  romansBackground.classList.toggle('is-active', backgroundIsActive);
   bookMap.classList.toggle('is-active', mapIsActive);
   logicOverview.classList.toggle('is-active', logicIsActive);
+  responsesOverview.classList.toggle('is-active', responsesIsActive);
   focus.classList.toggle('is-active', focusIsActive);
   intro.setAttribute('aria-hidden', p >= .1);
   overview.setAttribute('aria-hidden', !chapterIsActive);
+  romansBackground.setAttribute('aria-hidden', !backgroundIsActive);
   bookMap.setAttribute('aria-hidden', !mapIsActive);
   logicOverview.setAttribute('aria-hidden', !logicIsActive);
+  responsesOverview.setAttribute('aria-hidden', !responsesIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
-  if (!copyFeedback) copyButton.textContent = activeTheme >= 0 ? 'COPY SECTION' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', activeTheme >= 0 ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : 'Copy Romans 12');
+  if (!copyFeedback) copyButton.textContent = activeTheme >= 0 && !responsesIsActive ? 'COPY SECTION' : responsesIsActive ? 'COPY RESPONSES' : logicIsActive && !responsesIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', activeTheme >= 0 && !responsesIsActive ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : responsesIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
   const navIndex = navButtons.reduce((active, button, index) =>
-    p >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
+    raw >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
     button.classList.toggle('is-active', index === navIndex);
     if (index === navIndex) button.setAttribute('aria-current', 'step');
@@ -278,7 +291,7 @@ function animateToCheckpoint(index, quick = false) {
   }
   clearTimeout(snapTimer);
   navigating = true;
-  const duration = reducedMotion.matches ? 0 : [9, 10, 12, 13].includes(index) ? 2400 : quick ? 1100 : 1700;
+  const duration = reducedMotion.matches ? 0 : [17, 19, 20].includes(index) ? 3600 : [11, 12, 14, 15].includes(index) ? 2400 : quick ? 1100 : 1700;
   const startTime = performance.now();
 
   function frame(now) {
@@ -347,9 +360,10 @@ window.addEventListener('scroll', () => {
 }, {passive:true});
 
 copyButton.addEventListener('click', async () => {
-  const p = progress();
-  const theme = p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : p >= .73 ? themeWorship : null;
-  const source = p >= .38 ? logicOverview : p >= .23 ? bookMap : document.querySelector('.chapter-text');
+  const raw = progress();
+  const p = logicalProgress(raw);
+  const theme = raw >= .98 ? p >= 1.67 ? themeLove : p >= 1.30 ? themeServe : themeWorship : null;
+  const source = raw >= .85 && raw < .98 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .36 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
   const text = (theme
     ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
     : source.innerText).replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
@@ -377,7 +391,7 @@ copyButton.addEventListener('click', async () => {
 
 navButtons.forEach(button => button.addEventListener('click', () => {
   const index = Number(button.dataset.checkpoint);
-  if ([9, 10, 12, 13].includes(index)) {
+  if ([11, 12, 14, 15].includes(index)) {
     ++navigationToken;
     navigating = false;
     const leadIn = checkpoints[index - 1] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight);

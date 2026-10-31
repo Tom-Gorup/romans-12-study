@@ -273,3 +273,102 @@
 @media (max-width: 450px) and (max-height: 650px) {
   :root { --scripture-size: 18px; }
 }
+
+/* Opening: the therefore mark is the visual title. */
+.intro .therefore-mark { width: 205px; height: 178px; }
+.intro .therefore-mark span { width: 38px; height: 38px; }
+.intro .therefore-mark span:nth-child(1) { left: 42px; top: 12px; }
+.intro .therefore-mark span:nth-child(2) { right: 42px; top: 12px; }
+.intro .therefore-mark span:nth-child(3) { left: 83px; top: 99px; }
+.intro-therefore { margin-bottom: 184px; font-size: 18px; letter-spacing: .15em; }
+.intro-title { font-size: clamp(24px, 2.6vw, 31px); }
+
+/* The user-provided PowerPoint supplies the Romans background facts and engraving. */
+.romans-background { position:absolute; inset:0; z-index:2; opacity:var(--background-opacity,0); pointer-events:none; overflow:hidden; background:#0b0b0a; }
+.romans-background.is-active { pointer-events:auto; }
+.background-engraving { position:absolute; right:-3%; top:0; width:65%; height:100%; object-fit:cover; object-position:55% center; filter:grayscale(1) sepia(.5) contrast(1.18) brightness(.26); opacity:.58; mask-image:linear-gradient(to right,transparent,#000 22%); }
+.romans-background::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#0b0b0a 23%,transparent 78%),linear-gradient(0deg,#0b0b0a99,transparent 35%); pointer-events:none; }
+.background-content { position:absolute; z-index:1; inset:13% 8% 12%; display:flex; flex-direction:column; justify-content:center; max-width:1050px; }
+.background-content h2 { margin:13px 0 38px; font:400 clamp(49px,6vw,88px)/.98 Georgia,serif; letter-spacing:-.055em; }
+.background-content h2 em { color:var(--orange-light); font-weight:400; }
+.background-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:27px 50px; max-width:770px; }
+.background-facts p { margin:0; max-width:360px; color:#d0c9bf; font:18px/1.38 Georgia,serif; }
+.background-facts strong { display:block; margin-bottom:8px; color:var(--orange-light); font:700 10px/1.2 Arial,sans-serif; letter-spacing:.21em; text-transform:uppercase; }
+.background-takeaway { max-width:790px; margin-top:42px; padding-top:20px; border-top:1px solid #8c5637; color:var(--paper); font:italic 23px/1.3 Georgia,serif; }
+
+/* One large Consecration tableau follows three quoted logic steps. */
+.logic-therefore-mark { width:160px; height:123px; margin-bottom:13px; }
+.logic-therefore-mark span { width:35px; height:35px; }
+.logic-therefore-mark span:nth-child(1) { left:31px; top:0; }
+.logic-therefore-mark span:nth-child(2) { right:31px; top:0; }
+.logic-therefore-mark span:nth-child(3) { left:62px; top:68px; }
+.logic-card[data-logic="3"] { opacity:.48; }
+.logic-card[data-logic="3"].is-current { opacity:.48; border-top-color:#51483f; background:linear-gradient(155deg,#1a1917,#11110f); }
+.logic-conclusion-card blockquote { margin:25px 0 0; padding-top:20px; border-top:1px solid #80513a; color:#e9c9b3; font:italic 20px/1.32 Georgia,serif; }
+.logic-conclusion-card cite { display:block; margin-top:13px; color:var(--orange-light); font:700 9px Arial,sans-serif; letter-spacing:.18em; font-style:normal; }
+
+/* The transition slide names the three responses before the first reading. */
+.responses-overview { position:absolute; inset:0; z-index:2; display:grid; place-items:center; opacity:var(--responses-opacity,0); pointer-events:none; background:#0b0b0a; }
+.responses-overview.is-active { pointer-events:auto; }
+.responses-inner { width:min(1070px,82vw); text-align:center; }
+.responses-mark.therefore-mark { transform:scale(.56); transform-origin:bottom center; height:90px; margin-top:-24px; }
+.responses-inner h2 { margin:5px 0 42px; color:var(--paper); font:italic 400 clamp(42px,5vw,72px)/1 Georgia,serif; letter-spacing:-.045em; }
+.response-list { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; text-align:left; }
+.response-list article { min-height:215px; padding:28px 24px; border:1px solid #4c3b31; border-top:2px solid var(--orange-light); background:linear-gradient(155deg,#251a14,#13110f); }
+.response-list article>span { color:var(--orange-light); font:700 10px Arial,sans-serif; letter-spacing:.18em; }
+.response-list h3 { margin:35px 0 0; color:var(--paper); font:400 clamp(25px,2.35vw,35px)/1.13 Georgia,serif; letter-spacing:-.03em; }
+
+/* The same triangular mark precedes each Romans 12 statement. */
+.three-dots { position:relative; display:inline-block; width:31px; height:28px; margin-right:12px; vertical-align:-3px; }
+.three-dots b { position:absolute; width:7px; height:7px; border-radius:50%; background:var(--orange-light); }
+.three-dots b:nth-child(1) { left:3px; top:2px; }.three-dots b:nth-child(2) { right:3px; top:2px; }.three-dots b:nth-child(3) { left:12px; top:17px; }
+.focus .verse .verse-number { display:inline; font:700 .48em Arial,sans-serif; color:var(--orange-light); vertical-align:baseline; top:-.45em; margin-right:.22em; }
+
+/* Long passages remain single selectable paragraphs while the reading window pans. */
+.continuous-passage { inset:20% 7% 10%; }
+.continuous-passage .passage-frame { height:100%; }
+.continuous-passage .passage-reading { height:100%; display:flex; flex-direction:column; justify-content:center; }
+.continuous-window { height:min(50svh,600px); overflow:hidden; mask-image:linear-gradient(to bottom,transparent,#000 5%,#000 93%,transparent); }
+.continuous-text { transform:translateY(var(--passage-pan,0px)); will-change:transform; }
+.continuous-passage .passage-citation { align-self:flex-start; }
+.continuous-passage .passage-text { margin:0; }
+
+@media(max-width:900px) {
+  .background-content { inset:11% 8% 10%; }
+  .background-content h2 { margin-bottom:28px; }
+  .background-facts { gap:20px 28px; max-width:650px; }
+  .background-facts p { font-size:16px; }
+  .background-takeaway { font-size:20px; margin-top:27px; }
+  .logic-therefore-mark { transform:scale(.76); height:88px; margin-bottom:0; }
+  .responses-inner { width:min(760px,82vw); }
+  .response-list article { min-height:180px; padding:20px 16px; }
+  .response-list h3 { margin-top:24px; font-size:24px; }
+}
+@media(max-width:700px) {
+  .intro-therefore { margin-bottom:145px; }
+  .background-engraving { width:100%; opacity:.34; }
+  .background-content { inset:12% 9% 11%; }
+  .background-content h2 { font-size:clamp(42px,8vw,59px); }
+  .background-facts { grid-template-columns:1fr; gap:15px; }
+  .background-facts p { font-size:15px; }
+  .background-facts strong { margin-bottom:4px; }
+  .background-takeaway { font-size:17px; margin-top:18px; padding-top:12px; }
+  .response-list { grid-template-columns:1fr; gap:8px; }
+  .response-list article { min-height:0; padding:16px 18px; }
+  .response-list h3 { margin-top:8px; font-size:25px; }
+  .responses-inner h2 { margin-bottom:25px; }
+  .continuous-passage { inset:18% 7% 9%; }
+  .continuous-window { height:49svh; }
+}
+@media(max-width:450px) {
+  .intro .therefore-mark { transform:scale(.85); transform-origin:center bottom; height:150px; }
+  .intro-therefore { margin-bottom:132px; }
+  .logic-therefore-mark { transform:scale(.65); height:76px; }
+  .logic-card[data-logic="3"] blockquote { display:none; }
+  .logic-conclusion-card blockquote { font-size:15px; margin-top:14px; padding-top:12px; }
+  .responses-mark.therefore-mark { height:64px; }
+  .responses-inner h2 { font-size:37px; }
+  .response-list h3 { font-size:21px; }
+  .continuous-passage { inset:17% 7% 9%; }
+  .continuous-window { height:47svh; }
+}
