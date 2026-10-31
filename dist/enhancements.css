@@ -80,8 +80,8 @@
 .circle-anchor { position: relative; display: inline-block; white-space: nowrap; }
 .word-circle { position: absolute; z-index: 2; left: -9%; top: -17%; width: 118%; height: 137%; overflow: visible; pointer-events: none; }
 .word-circle path { fill: none; stroke: var(--orange); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; filter: drop-shadow(0 0 3px rgba(201, 109, 58, .22)); }
-#conformed-anchor path { stroke-dashoffset: calc(100 - var(--conformed-circle, 0) * 100); }
-#transformed-anchor path { stroke-dashoffset: calc(100 - var(--transformed-circle, 0) * 100); }
+#conformed-anchor path { stroke-dashoffset: calc(100 - var(--conformed-circle, 0) * 100); opacity: var(--translation-circle-opacity, 1); }
+#transformed-anchor path { stroke-dashoffset: calc(100 - var(--transformed-circle, 0) * 100); opacity: var(--translation-circle-opacity, 1); }
 #mind-anchor path { stroke-dashoffset: calc(100 - var(--mind-circle, 0) * 100); }
 .verse-two-note-slot { position: relative; min-height: 275px; align-self: center; }
 .verse-two-note { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; pointer-events: none; }

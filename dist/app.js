@@ -25,6 +25,7 @@ const verseTwoSlide = document.querySelector('.passage-two');
 const verseTwoDrawing = document.getElementById('verse-two-drawing');
 const conformedAnchor = document.getElementById('conformed-anchor');
 const transformedAnchor = document.getElementById('transformed-anchor');
+const mindAnchor = document.getElementById('mind-anchor');
 const testingAnchor = document.getElementById('testing-anchor');
 const translationNote = document.getElementById('translation-note');
 const testingNote = document.getElementById('testing-note');
@@ -91,13 +92,13 @@ function drawVerseTwo() {
   const x = value => value - slide.left;
   const y = value => value - slide.top;
   const mobile = window.innerWidth <= 700;
-  const translation = translationNote.getBoundingClientRect();
+  const translation = translationNote.querySelector('.hand-note').getBoundingClientRect();
   [[conformedAnchor, 'conformed-connector', 0], [transformedAnchor, 'transformed-connector', 18]].forEach(([anchorNode, pathId, offset]) => {
     const a = anchorNode.getBoundingClientRect();
     const x1 = mobile ? x(a.left) - 7 : x(a.right) + 6;
     const y1 = y(a.top + a.height * .56);
-    const x2 = x(translation.left) + 7;
-    const y2 = y(translation.top + 25 + offset);
+    const x2 = x(translation.left) - 8;
+    const y2 = y(translation.top + 18 + offset);
     const middle = mobile ? 12 + offset * .25 : x1 + Math.max(30, (x2 - x1) * .55);
     const d = mobile
       ? `M ${x1} ${y1} C ${middle} ${y1 + 5}, ${middle} ${y2 - 25}, ${x2} ${y2}`
@@ -121,18 +122,15 @@ function drawVerseTwo() {
   document.getElementById('testing-underline').setAttribute('d', rows.map(row =>
     `M ${x(row.left)} ${y(row.bottom) + 3} Q ${x((row.left + row.right) / 2)} ${y(row.bottom) + 7}, ${x(row.right)} ${y(row.bottom) + 3}`
   ).join(' '));
-  const last = rows[rows.length - 1];
-  if (last) {
-    const note = testingNote.getBoundingClientRect();
-    const x1 = mobile ? x(last.left) - 7 : x(last.right) + 4;
-    const y1 = y(last.bottom) + 7;
-    const x2 = x(note.left) + 8;
-    const y2 = y(note.top) + 24;
-    const middle = mobile ? 13 : x1 + Math.max(30, (x2 - x1) * .53);
-    document.getElementById('testing-connector').setAttribute('d', mobile
-      ? `M ${x1} ${y1} C ${middle} ${y1 + 10}, ${middle} ${y2 - 24}, ${x2} ${y2}`
-      : `M ${x1} ${y1} C ${x1 + 120} ${y1 + 22}, ${x2 - 18} ${y1 + 22}, ${x2} ${y2}`);
-  }
+  const mind = mindAnchor.getBoundingClientRect();
+  const noteText = testingNote.querySelector('.hand-note').getBoundingClientRect();
+  const x1 = mobile ? x(mind.left) - 7 : x(mind.right) + 8;
+  const y1 = y(mind.top + mind.height * .55);
+  const x2 = x(noteText.left) - 8;
+  const y2 = y(noteText.top + Math.min(24, noteText.height * .18));
+  document.getElementById('testing-connector').setAttribute('d', mobile
+    ? `M ${x1} ${y1} C 12 ${y1 + 16}, 12 ${y2 - 26}, ${x2} ${y2}`
+    : `M ${x1} ${y1} C ${x1 + 80} ${y1 - 25}, ${x2 - 75} ${y2 - 15}, ${x2} ${y2}`);
 }
 
 function update() {
@@ -182,16 +180,17 @@ function update() {
   root.style.setProperty('--living-underline', ramp(p, .99, 1).toFixed(4));
   root.style.setProperty('--conformed-circle', ramp(p, 1.112, 1.13).toFixed(4));
   root.style.setProperty('--transformed-circle', ramp(p, 1.125, 1.142).toFixed(4));
+  root.style.setProperty('--translation-circle-opacity', (1 - ramp(p, 1.172, 1.187)).toFixed(4));
   root.style.setProperty('--translation-line', ramp(p, 1.14, 1.153).toFixed(4));
-  root.style.setProperty('--translation-line-opacity', (1 - ramp(p, 1.18, 1.198)).toFixed(4));
-  root.style.setProperty('--translation-note-opacity', (ramp(p, 1.148, 1.164) * (1 - ramp(p, 1.181, 1.199))).toFixed(4));
+  root.style.setProperty('--translation-line-opacity', (1 - ramp(p, 1.172, 1.187)).toFixed(4));
+  root.style.setProperty('--translation-note-opacity', (ramp(p, 1.148, 1.164) * (1 - ramp(p, 1.172, 1.187))).toFixed(4));
   translationLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, 1.15 + i * .0035, 1.158 + i * .0035).toFixed(4)));
   root.style.setProperty('--mind-circle', ramp(p, 1.173, 1.188).toFixed(4));
   root.style.setProperty('--testing-underline-progress', ramp(p, 1.186, 1.206).toFixed(4));
   root.style.setProperty('--testing-line', ramp(p, 1.203, 1.216).toFixed(4));
   root.style.setProperty('--testing-note-opacity', ramp(p, 1.213, 1.227).toFixed(4));
   testingLines.forEach((line, i) => line.style.setProperty('--line-progress', ramp(p, 1.213 + i * .003, 1.220 + i * .003).toFixed(4)));
-  translationNote.setAttribute('aria-hidden', p < 1.148 || p >= 1.199);
+  translationNote.setAttribute('aria-hidden', p < 1.148 || p >= 1.187);
   testingNote.setAttribute('aria-hidden', p < 1.213);
   root.style.setProperty('--expand35', ramp(p, 1.365, 1.44).toFixed(4));
   const expanded = p >= 1.4;
