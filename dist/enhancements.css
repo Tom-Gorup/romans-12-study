@@ -488,7 +488,11 @@
 .worship-summary { position:absolute; z-index:7; inset:0; display:grid; place-items:center; padding:9% 7%; box-sizing:border-box; background:#0b0b0a; opacity:var(--worship-summary-opacity,0); pointer-events:none; }
 .worship-summary.is-active { pointer-events:auto; }
 .summary-inner { width:min(1220px,100%); text-align:center; }
-.summary-mark.therefore-mark { transform:scale(.67); transform-origin:center bottom; height:95px; margin:0 auto 12px; }
+.summary-mark.therefore-mark { position:relative; width:90px; height:78px; transform:none; margin:0 auto 16px; }
+.summary-mark.therefore-mark span { width:18px; height:18px; }
+.summary-mark.therefore-mark span:nth-child(1) { left:15px; top:0; }
+.summary-mark.therefore-mark span:nth-child(2) { right:15px; top:0; }
+.summary-mark.therefore-mark span:nth-child(3) { left:36px; top:43px; }
 .summary-inner h2 { margin:0 0 55px; color:var(--paper); font:400 clamp(42px,5.2vw,76px)/1.03 Georgia,serif; letter-spacing:-.055em; }
 .summary-inner h2 em { color:var(--orange-light); font-weight:400; }
 .summary-three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; text-align:left; }
@@ -510,7 +514,11 @@
   .summary-three h3 { margin:9px 0 5px; font-size:27px; }
   .summary-three p { font-size:15px; }
   .summary-inner h2 { margin-bottom:22px; font-size:clamp(37px,7vw,50px); }
-  .summary-mark.therefore-mark { height:65px; transform:scale(.5); margin-bottom:0; }
+  .summary-mark.therefore-mark { width:72px; height:65px; margin-bottom:10px; }
+  .summary-mark.therefore-mark span { width:14px; height:14px; }
+  .summary-mark.therefore-mark span:nth-child(1) { left:12px; top:0; }
+  .summary-mark.therefore-mark span:nth-child(2) { right:12px; top:0; }
+  .summary-mark.therefore-mark span:nth-child(3) { left:29px; top:35px; }
 }
 @media(max-width:450px) {
   .conclusion-therefore-mark { transform:scale(.7); transform-origin:center bottom; height:54px; margin-bottom:10px; }
