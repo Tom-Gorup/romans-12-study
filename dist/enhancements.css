@@ -569,12 +569,39 @@
   .serve-body-note .body-drawing { width:25%; height:100px; flex:none; }
   .serve-body-note .hand-note { width:72%; font-size:clamp(20px,3.2vw,27px); }
   .serve-gifts .passage-citation { margin-top:11px; }
-  #love-passage .passage-text { font-size:15px; line-height:1.14; }
+  .love-reading .passage-text { font-size:18px; line-height:1.18; }
 }
 @media(max-width:450px) {
   .serve-slide .passage-text { font-size:19px; }
   .serve-gifts .passage-text { font-size:14px; line-height:1.13; }
   .serve-slide .passage-frame { gap:10px; }
   .serve-body-note .body-drawing { height:82px; }
-  #love-passage .passage-text { font-size:13px; line-height:1.12; }
+  .love-reading .passage-text { font-size:15px; line-height:1.16; }
+}
+
+/* Love's two scripture readings retain the verse-slide standard; the supplied
+   action tables become a clear, selectable speaking outline between them. */
+.love-practice-slide { position:absolute; inset:20% 7% 11%; display:flex; align-items:center; opacity:var(--slide-opacity,0); transform:translateY(calc((1 - var(--slide-opacity,0))*20px)); pointer-events:none; user-select:text; }
+.love-practice-slide.is-active { pointer-events:auto; }
+.practice-inner { width:100%; max-width:1260px; margin:0 auto; }
+.practice-heading { margin-bottom:20px; }
+.practice-heading > span { color:var(--orange-light); font:700 10px/1.2 Arial,sans-serif; letter-spacing:.22em; }
+.practice-heading h3 { margin:8px 0 0; color:var(--paper); font:400 clamp(29px,3.2vw,44px)/1.04 Georgia,serif; letter-spacing:-.04em; }
+.practice-grid { counter-reset:love-actions; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 13px; margin:0; padding:0; list-style:none; }
+.practice-grid li { counter-increment:love-actions; display:grid; grid-template-columns:31px minmax(0,1fr); align-items:center; min-height:47px; padding:9px 13px; border:1px solid #4c3b31; border-left:2px solid var(--orange); background:linear-gradient(105deg,rgba(45,28,20,.85),rgba(22,19,16,.85)); color:var(--paper); font:400 clamp(16px,1.45vw,21px)/1.17 Georgia,serif; }
+.practice-grid li::before { content:counter(love-actions,decimal-leading-zero); align-self:start; padding-top:2px; color:var(--orange-light); font:700 10px/1.2 Arial,sans-serif; letter-spacing:.04em; }
+.responses-reprise { opacity:var(--responses-reprise-opacity,0); }
+.responses-reprise .responses-inner { opacity:var(--responses-reprise-opacity,0); }
+@media(max-width:700px) {
+  .love-practice-slide { inset:16% 7% 10%; }
+  .practice-heading { margin-bottom:12px; }
+  .practice-heading h3 { font-size:29px; }
+  .practice-grid { grid-template-columns:1fr; gap:4px; }
+  .practice-grid li { grid-template-columns:26px minmax(0,1fr); min-height:0; padding:6px 9px; font-size:16px; line-height:1.15; }
+  .practice-grid li::before { font-size:9px; }
+}
+@media(max-width:450px) {
+  .love-practice-slide { inset:15% 7% 9%; }
+  .practice-heading h3 { font-size:25px; }
+  .practice-grid li { font-size:14px; padding:5px 8px; }
 }
