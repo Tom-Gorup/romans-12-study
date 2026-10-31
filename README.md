@@ -1,6 +1,6 @@
 # Romans 12 — annotated study
 
-A scroll-driven Bible study presentation. It opens with the ∴ symbol, moves from Romans 12 to a map of the letter, then follows four pivotal passages into verse 1 and a handwritten reflection question.
+A scroll-driven Bible study presentation built with HTML, CSS, and JavaScript in `dist/`.
 
 ## Preview locally
 
@@ -8,17 +8,16 @@ A scroll-driven Bible study presentation. It opens with the ∴ symbol, moves fr
 python3 -m http.server 8765 --directory dist
 ```
 
-Open `http://localhost:8765/`. Scroll or press the right/down arrows to move through the pause points; left/up moves backward. Use the connected dots on the left to jump between major sections. Text can be selected normally, and the footer button copies the current chapter, outline, notes, or verse. The source is buildless HTML, CSS, and JavaScript in `dist/`.
+Open `http://localhost:8765/`. Scroll or press the right/down arrows to advance; left/up moves backward. The connected dots jump to major sections. Scripture remains selectable and copyable.
 
-## Sequence
+## Publish
 
-1. Opening ∴ symbol and Romans 12 title
-2. Whole chapter overview
-3. Four-part map of Romans, locating chapter 12 in the final movement
-4. Accountability (Romans 3:19), justification (5:1), no condemnation (8:1), and consecration (12:1), followed by the summary
-5. Verse 1 close-up with **therefore**, **mercies of God**, and **living sacrifice** emphasized
-6. Circle around “mercies of God” and connector to the handwritten reflection question
+Vercel serves `dist/` as a static site, as configured in `vercel.json`. The `main` branch of [Tom-Gorup/romans-12-study](https://github.com/Tom-Gorup/romans-12-study) is connected to the production Vercel project. Commit changes and push `main` to trigger a new deployment:
 
-Romans 3:19 is presented as the accountability premise; the ESV uses “therefore” in the later three cited verses.
+```sh
+git add .
+git commit -m "Update Romans 12 presentation"
+git push origin main
+```
 
-Scroll progress drives each element in `dist/app.js`, so annotations can be added as later stages.
+The production domain is `romans12.tomgorup.com`.
