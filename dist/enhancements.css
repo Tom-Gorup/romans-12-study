@@ -593,6 +593,22 @@
 .practice-grid li::before { content:counter(love-actions,decimal-leading-zero); align-self:start; padding-top:2px; color:var(--orange-light); font:700 10px/1.2 Arial,sans-serif; letter-spacing:.04em; }
 .responses-reprise { opacity:var(--responses-reprise-opacity,0); }
 .responses-reprise .responses-inner { opacity:var(--responses-reprise-opacity,0); }
+
+/* A final handwritten beat after the closing three responses. */
+.end-slide { position:absolute; inset:0; z-index:9; display:grid; place-items:center; padding:100px 7% 90px; background:#0b0b0a; opacity:var(--end-opacity,0); pointer-events:none; user-select:text; }
+.end-slide.is-active { pointer-events:auto; }
+.end-inner { width:min(760px,100%); text-align:center; }
+.end-mark.therefore-mark { width:132px; height:108px; margin:0 auto 8px; transform:scale(.72); transform-origin:center bottom; }
+.end-slide h2 { display:block; width:max-content; max-width:100%; margin:0 auto; padding:0 .12em; color:var(--orange-light); font:600 clamp(106px,15vw,220px)/.97 Caveat,'Bradley Hand',cursive; letter-spacing:-.045em; white-space:nowrap; clip-path:inset(0 calc((1 - var(--end-write,0))*100%) 0 0); }
+.end-flourish { display:block; width:min(520px,80%); height:64px; margin:-8px auto 0; overflow:visible; }
+.end-flourish path { fill:none; stroke:var(--orange); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:100; stroke-dashoffset:calc(100 - var(--end-flourish,0)*100); }
+.stage.is-ending .copy-button, .stage.is-ending .scroll-cue { visibility:hidden; }
+@media(max-width:700px) {
+  .end-slide { padding:85px 8% 70px; }
+  .end-mark.therefore-mark { transform:scale(.62); height:92px; margin-bottom:0; }
+  .end-slide h2 { font-size:clamp(82px,17vw,130px); }
+  .end-flourish { width:min(350px,78%); height:45px; margin-top:-4px; }
+}
 @media(max-width:700px) {
   .love-practice-slide { inset:16% 7% 10%; }
   .practice-heading { margin-bottom:12px; }

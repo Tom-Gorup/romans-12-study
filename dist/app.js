@@ -22,6 +22,7 @@ const quotePanels = [...document.querySelectorAll('.quote-panel')];
 const logicConclusion = document.querySelector('.logic-conclusion');
 const responsesOverview = document.getElementById('responses-overview');
 const responsesReprise = document.getElementById('responses-reprise');
+const theEnd = document.getElementById('the-end');
 const worshipSummary = document.getElementById('worship-summary');
 const navButtons = [...document.querySelectorAll('.section-nav button')];
 const focus = document.getElementById('focus');
@@ -52,7 +53,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 1.80, 1.90, 2.00, 2.10, 2.22, 2.38, 2.53, 2.70, 2.88];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 1.80, 1.90, 2.00, 2.10, 2.22, 2.38, 2.53, 2.70, 2.88, 3.06];
 const storyEnd = checkpoints[checkpoints.length - 1];
 function logicalProgress(raw) {
   if (raw < .23) return raw;
@@ -213,8 +214,11 @@ function update() {
   root.style.setProperty('--background-opacity', backgroundOpacity.toFixed(4));
   const responsesOpacity = ramp(raw, .85, .88) * (1 - ramp(raw, .96, 1.02));
   root.style.setProperty('--responses-opacity', responsesOpacity.toFixed(4));
-  const repriseOpacity = ramp(raw, 2.82, 2.88);
+  const repriseOpacity = ramp(raw, 2.82, 2.88) * (1 - ramp(raw, 2.95, 3.00));
   root.style.setProperty('--responses-reprise-opacity', repriseOpacity.toFixed(4));
+  root.style.setProperty('--end-opacity', ramp(raw, 2.95, 3.00).toFixed(4));
+  root.style.setProperty('--end-write', ramp(raw, 2.97, 3.04).toFixed(4));
+  root.style.setProperty('--end-flourish', ramp(raw, 3.02, 3.06).toFixed(4));
   root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(raw, .18, .23))).toFixed(4));
   const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
   root.style.setProperty('--overview-scale', (overviewFit * (1 - pullBack * .58)).toFixed(4));
@@ -306,16 +310,17 @@ function update() {
     slide.classList.toggle('is-active', active);
     slide.setAttribute('aria-hidden', !active);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.055 ? '09' : raw < 2.20 ? '10' : raw < 2.85 ? '11' : '12';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.055 ? 'THEREFORE / SERVE' : raw < 2.20 ? 'THE WHOLE BODY' : raw < 2.85 ? 'THEREFORE / LOVE' : 'THREE RESPONSES';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.055 ? '09' : raw < 2.20 ? '10' : raw < 2.85 ? '11' : raw < 2.99 ? '12' : '13';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.055 ? 'THEREFORE / SERVE' : raw < 2.20 ? 'THE WHOLE BODY' : raw < 2.85 ? 'THEREFORE / LOVE' : raw < 2.99 ? 'THREE RESPONSES' : 'THE END';
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
   const responsesIsActive = raw >= .85 && raw < 1.015;
-  const repriseIsActive = raw >= 2.85;
+  const repriseIsActive = raw >= 2.85 && raw < 2.99;
+  const endIsActive = raw >= 2.99;
   const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
   const focusIsActive = raw >= .96 && p < 1.30;
-  const activeTheme = repriseIsActive || raw < .96 ? -1 : summaryIsActive || raw < 1.70 ? 0 : raw < 2.20 ? 1 : 2;
+  const activeTheme = raw >= 2.85 || raw < .96 ? -1 : summaryIsActive || raw < 1.70 ? 0 : raw < 2.20 ? 1 : 2;
   const readingTheme = [
     raw >= 1.00 && raw < 1.10,
     raw >= 1.66 && raw < 1.74 || raw >= 1.85 && raw < 1.92,
@@ -333,6 +338,8 @@ function update() {
   logicOverview.classList.toggle('is-active', logicIsActive);
   responsesOverview.classList.toggle('is-active', responsesIsActive);
   responsesReprise.classList.toggle('is-active', repriseIsActive);
+  theEnd.classList.toggle('is-active', endIsActive);
+  stage.classList.toggle('is-ending', endIsActive);
   focus.classList.toggle('is-active', focusIsActive);
   intro.setAttribute('aria-hidden', p >= .1);
   intro.inert = p >= .1;
@@ -343,6 +350,7 @@ function update() {
   logicOverview.setAttribute('aria-hidden', !logicIsActive);
   responsesOverview.setAttribute('aria-hidden', !responsesIsActive);
   responsesReprise.setAttribute('aria-hidden', !repriseIsActive);
+  theEnd.setAttribute('aria-hidden', !endIsActive);
   focus.setAttribute('aria-hidden', !focusIsActive);
   copyButton.disabled = p < .1;
   const loveStep = raw < 2.20 || raw >= 2.85 ? -1 : raw < 2.35 ? 0 : raw < 2.50 ? 1 : raw < 2.67 ? 2 : 3;
