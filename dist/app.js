@@ -32,6 +32,7 @@ const themes = [themeWorship, themeServe, themeLove];
 const passageSlides = [...document.querySelectorAll('.passage-slide')];
 const serve34 = document.getElementById('serve-34');
 const serve58 = document.getElementById('serve-58');
+const standingSlide = document.getElementById('standing-slide');
 const serve34Note = document.getElementById('serve-34-note');
 const serve58Note = document.getElementById('serve-58-note');
 const loveReadings = [...document.querySelectorAll('.love-reading')];
@@ -51,7 +52,7 @@ const copyButton = document.getElementById('copy-button');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
-const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 1.80, 1.90, 2.00, 2.22, 2.38, 2.53, 2.70, 2.88];
+const checkpoints = [0, .12, .28, .41, .55, .57, .62, .68, .75, .90, 1.02, 1.17, 1.26, 1.43, 1.49, 1.59, 1.72, 1.80, 1.90, 2.00, 2.10, 2.22, 2.38, 2.53, 2.70, 2.88];
 const storyEnd = checkpoints[checkpoints.length - 1];
 function logicalProgress(raw) {
   if (raw < .23) return raw;
@@ -284,6 +285,10 @@ function update() {
   serve58Note.querySelectorAll('.hand-note span').forEach((line, i) => line.style.setProperty('--line-progress', ramp(raw, 1.965 + i * .005, 1.98 + i * .005).toFixed(4)));
   serve34Note.setAttribute('aria-hidden', raw < 1.765 || raw >= 1.90);
   serve58Note.setAttribute('aria-hidden', raw < 1.96 || raw >= 2.22);
+  const standingIsActive = raw >= 2.055 && raw < 2.19;
+  root.style.setProperty('--standing-opacity', (ramp(raw, 2.025, 2.075) * (1 - ramp(raw, 2.16, 2.22))).toFixed(4));
+  standingSlide.classList.toggle('is-active', standingIsActive);
+  standingSlide.setAttribute('aria-hidden', !standingIsActive);
   const passageIndex = raw < 1.68 ? -1 : raw < 1.88 ? 0 : raw < 2.20 ? 1 : raw < 2.35 ? 2 : raw < 2.50 ? -1 : raw < 2.67 ? 3 : -1;
   passageSlides.forEach((slide, index) => {
     const timings = [[1.66,1.71,1.85,1.90],[1.85,1.90,2.17,2.22],[2.17,2.22,2.32,2.38],[2.47,2.53,2.64,2.70]];
@@ -301,8 +306,8 @@ function update() {
     slide.classList.toggle('is-active', active);
     slide.setAttribute('aria-hidden', !active);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.20 ? '09' : raw < 2.85 ? '10' : '11';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.20 ? 'THEREFORE / SERVE' : raw < 2.85 ? 'THEREFORE / LOVE' : 'THREE RESPONSES';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.055 ? '09' : raw < 2.20 ? '10' : raw < 2.85 ? '11' : '12';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.055 ? 'THEREFORE / SERVE' : raw < 2.20 ? 'THE WHOLE BODY' : raw < 2.85 ? 'THEREFORE / LOVE' : 'THREE RESPONSES';
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
@@ -340,8 +345,8 @@ function update() {
   copyButton.disabled = p < .1;
   const loveStep = raw < 2.20 || raw >= 2.85 ? -1 : raw < 2.35 ? 0 : raw < 2.50 ? 1 : raw < 2.67 ? 2 : 3;
   const loveCopyLabel = loveStep === 0 ? 'Romans 12 verses 9–13' : loveStep === 1 ? 'ways to show love from verses 9–13' : loveStep === 2 ? 'Romans 12 verses 14–21' : 'ways to show love from verses 14–21';
-  if (!copyFeedback) copyButton.textContent = summaryIsActive ? 'COPY SUMMARY' : loveStep >= 0 ? loveStep % 2 ? 'COPY LIST' : 'COPY PASSAGE' : activeTheme >= 0 ? 'COPY SECTION' : responsesIsActive || repriseIsActive ? 'COPY RESPONSES' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
-  copyButton.setAttribute('aria-label', summaryIsActive ? 'Copy body, mind, and allegiance summary' : loveStep >= 0 ? `Copy ${loveCopyLabel}` : activeTheme >= 0 ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : responsesIsActive || repriseIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
+  if (!copyFeedback) copyButton.textContent = standingIsActive ? 'COPY SLIDE' : summaryIsActive ? 'COPY SUMMARY' : loveStep >= 0 ? loveStep % 2 ? 'COPY LIST' : 'COPY PASSAGE' : activeTheme >= 0 ? 'COPY SECTION' : responsesIsActive || repriseIsActive ? 'COPY RESPONSES' : logicIsActive ? 'COPY NOTES' : mapIsActive ? 'COPY OUTLINE' : backgroundIsActive ? 'COPY BACKGROUND' : 'COPY CHAPTER';
+  copyButton.setAttribute('aria-label', standingIsActive ? 'Copy what it takes to stand up' : summaryIsActive ? 'Copy body, mind, and allegiance summary' : loveStep >= 0 ? `Copy ${loveCopyLabel}` : activeTheme >= 0 ? `Copy Romans 12 ${['1–2', '3–8', '9–21'][activeTheme]}` : responsesIsActive || repriseIsActive ? 'Copy three Romans 12 responses' : logicIsActive ? 'Copy Romans passage notes' : mapIsActive ? 'Copy Romans outline' : backgroundIsActive ? 'Copy Romans background' : 'Copy Romans 12');
   const navIndex = navButtons.reduce((active, button, index) =>
     raw >= checkpoints[Number(button.dataset.checkpoint)] - .02 ? index : active, 0);
   navButtons.forEach((button, index) => {
@@ -469,10 +474,11 @@ copyButton.addEventListener('click', async () => {
   const raw = progress();
   const p = logicalProgress(raw);
   const summaryIsActive = raw >= 1.53 && raw < 1.70;
+  const standingIsActive = raw >= 2.055 && raw < 2.19;
   const loveSource = raw < 2.20 || raw >= 2.85 ? null : raw < 2.35 ? loveReadings[0].querySelector('.passage-text') : raw < 2.50 ? lovePracticeSlides[0] : raw < 2.67 ? loveReadings[1].querySelector('.passage-text') : lovePracticeSlides[1];
   const theme = summaryIsActive || raw >= 2.20 ? null : raw >= 1.02 ? raw >= 1.70 ? themeServe : themeWorship : null;
   const source = summaryIsActive ? worshipSummary : raw >= 2.85 ? responsesReprise : raw >= .85 && raw < 1.02 ? responsesOverview : raw >= .51 ? logicOverview : raw >= .40 ? bookMap : raw >= .23 ? romansBackground : document.querySelector('.chapter-text');
-  const text = (loveSource ? loveSource.innerText : theme
+  const text = (standingIsActive ? standingSlide.innerText : loveSource ? loveSource.innerText : theme
     ? [...theme.querySelectorAll('.verse, .passage-text')].map(node => node.textContent).join(' ')
     : source.innerText).replace(/\s+/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim();
   let copied = false;
