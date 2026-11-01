@@ -15,11 +15,11 @@
 .map-poster figcaption { color: #8f8980; font: 10px Arial, sans-serif; letter-spacing: .07em; }
 .map-poster a { color: #b7a493; text-decoration: underline; text-underline-offset: 2px; }
 .map-grid { gap: 10px; }
-.map-card { min-height: 180px; padding: 21px 22px 36px; }
-.map-card h3 { font-size: clamp(21.6px, 2.1vw, 30px); margin: 11px 0 0; }
-.map-index { font-size: 30px; }
-.map-range { font-size: 9.6px; }
-.you-are-here { left: 22px; bottom: 12px; font-size: 9.6px; }
+.map-card { min-height: 225px; padding: 26px 28px 45px; }
+.map-card h3 { font-size: clamp(23.76px, 2.31vw, 33px); margin: 12px 0 0; }
+.map-index { font-size: 33px; }
+.map-range { font-size: 10.56px; }
+.you-are-here { left: 28px; bottom: 15px; font-size: 10.56px; }
 
 /* The final therefore is its own two-part closing tableau. */
 .logic-overview > .logic-heading,
@@ -103,11 +103,11 @@
   .book-map { inset: 9% 7% 9%; gap: 11px; }
   .map-poster img { max-height: 34svh; }
   .map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-  .map-card { min-height: 125px; padding: 14px 16px 27px; }
-  .map-card h3 { font-size: 21.6px; margin: 6px 0 0; }
-  .map-index { font-size: 23px; }
-  .map-range { font-size: 8.4px; }
-  .you-are-here { left: 16px; bottom: 6px; font-size: 8.4px; }
+  .map-card { min-height: 156px; padding: 18px 20px 34px; }
+  .map-card h3 { font-size: 23.76px; margin: 7px 0 0; }
+  .map-index { font-size: 25.3px; }
+  .map-range { font-size: 9.24px; }
+  .you-are-here { left: 20px; bottom: 8px; font-size: 9.24px; }
   .logic-conclusion-card { min-height: 265px; }
   .logic-conclusion-card p { font-size: 16px; }
   .logic-conclusion-copy h3 { font-size: clamp(30px, 4vw, 43px); margin-bottom: 26px; }
@@ -130,9 +130,9 @@
   .map-poster img { max-height: 28svh; }
   .map-poster figcaption { font-size: 8px; }
   .map-grid { grid-template-columns: 1fr; gap: 4px; }
-  .map-card { min-height: 72px; padding: 9px 12px 9px 92px; }
-  .map-card-top { left: 12px; top: 12px; }
-  .map-card h3 { margin: 17px 0 0; font-size: 19.2px; }
+  .map-card { min-height: 90px; padding: 11px 15px 11px 115px; }
+  .map-card-top { left: 15px; top: 15px; }
+  .map-card h3 { margin: 19px 0 0; font-size: 21.12px; }
   .you-are-here { position: static; margin-top: 3px; }
   .logic-conclusion { grid-template-columns: 1fr; gap: 20px; align-content: center; }
   .logic-conclusion-card { min-height: 0; padding: 21px; }
