@@ -339,6 +339,7 @@ function update() {
   overview.setAttribute('aria-hidden', !chapterIsActive);
   romansBackground.setAttribute('aria-hidden', !backgroundIsActive);
   bookMap.setAttribute('aria-hidden', !mapIsActive);
+  bookMap.inert = !mapIsActive;
   logicOverview.setAttribute('aria-hidden', !logicIsActive);
   responsesOverview.setAttribute('aria-hidden', !responsesIsActive);
   responsesReprise.setAttribute('aria-hidden', !repriseIsActive);
