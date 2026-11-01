@@ -13,7 +13,8 @@ Each section has one persistent title with a small three-dot mark and one large 
 | Reading area | Scripture sits in the left column, aligned within the same slide inset on every verse slide. The right column is reserved for annotations. |
 | Scripture type | Georgia at the shared `--scripture-size` with 1.23 line height. Verse numbers and bold emphasis use the same burnt orange throughout. |
 | Citation | Place `ROMANS 12:… · ESV` directly below the scripture, aligned to the left edge. Use the shared citation spacing and style. |
-| Reflection | Add drawings and handwriting only when that reflection is active. Keep them in the right column and connect them to the relevant words. Do not add a “REFLECT” label. |
+| Reading beat | Each new passage first shows only its selectable scripture and citation. Hide the theme heading and all annotation marks until the next transition. |
+| Reflection | On the next beat, reveal the theme heading, drawings, and handwriting. Keep annotations in the right column and connect them to the relevant words. Do not add a “REFLECT” label. |
 | Text behavior | Keep scripture selectable and copyable. Annotation SVGs must not intercept pointer events. |
 | Long passages | Keep one continuous, selectable paragraph. Fit the entire passage on one slide at a slightly smaller size. Keep the citation and avoid panning, progressive reveals, tables, and dividers. |
 | Small screens | Stack the reading and annotation areas. Keep the same 7% side inset and shared mobile scripture size. |

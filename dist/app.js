@@ -301,18 +301,25 @@ function update() {
     slide.classList.toggle('is-active', active);
     slide.setAttribute('aria-hidden', !active);
   });
-  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.02 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.20 ? '09' : raw < 2.85 ? '10' : '11';
-  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.02 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.20 ? 'THEREFORE / SERVE' : raw < 2.85 ? 'THEREFORE / LOVE' : 'THREE RESPONSES';
+  document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.20 ? '09' : raw < 2.85 ? '10' : '11';
+  document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.20 ? 'THEREFORE / SERVE' : raw < 2.85 ? 'THEREFORE / LOVE' : 'THREE RESPONSES';
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
-  const responsesIsActive = raw >= .85 && raw < 1.02;
+  const responsesIsActive = raw >= .85 && raw < 1.015;
   const repriseIsActive = raw >= 2.85;
   const logicIsActive = !responsesIsActive && p >= .38 && p < .73;
-  const focusIsActive = !responsesIsActive && p >= .73 && p < 1.30;
-  const activeTheme = repriseIsActive || responsesIsActive || p < .73 ? -1 : summaryIsActive || raw < 1.70 ? 0 : raw < 2.20 ? 1 : 2;
+  const focusIsActive = raw >= .96 && p < 1.30;
+  const activeTheme = repriseIsActive || raw < .96 ? -1 : summaryIsActive || raw < 1.70 ? 0 : raw < 2.20 ? 1 : 2;
+  const readingTheme = [
+    raw >= 1.00 && raw < 1.10,
+    raw >= 1.66 && raw < 1.74 || raw >= 1.85 && raw < 1.92,
+    raw >= 2.17 && raw < 2.35 || raw >= 2.47 && raw < 2.67
+  ];
   themes.forEach((theme, index) => {
     theme.classList.toggle('is-active', index === activeTheme);
+    theme.classList.toggle('is-reading', index === activeTheme && readingTheme[index]);
+    theme.querySelector('.theme-heading').setAttribute('aria-hidden', index !== activeTheme || readingTheme[index]);
     theme.setAttribute('aria-hidden', index !== activeTheme);
   });
   overview.classList.toggle('is-active', chapterIsActive);
