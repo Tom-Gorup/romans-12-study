@@ -50,6 +50,7 @@ const translationLines = [...translationNote.querySelectorAll('.hand-note span')
 const testingLines = [...testingNote.querySelectorAll('.hand-note span')];
 const handNotes = [...document.querySelectorAll('.hand-note')];
 const copyButton = document.getElementById('copy-button');
+const readModeLink = document.getElementById('read-mode-link');
 const root = document.documentElement;
 const clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 const ramp = (value, from, to) => clamp((value - from) / (to - from));
@@ -220,7 +221,7 @@ function update() {
   root.style.setProperty('--end-write', ramp(raw, 2.97, 3.04).toFixed(4));
   root.style.setProperty('--end-flourish', ramp(raw, 3.02, 3.06).toFixed(4));
   root.style.setProperty('--overview-opacity', (ramp(p, .07, .12) * (1 - ramp(raw, .18, .23))).toFixed(4));
-  const overviewFit = window.innerWidth <= 700 ? Math.min(1, (window.innerWidth - 24) / 1180) : 1;
+  const overviewFit = 1;
   root.style.setProperty('--overview-scale', (overviewFit * (1 - pullBack * .58)).toFixed(4));
   root.style.setProperty('--map-opacity', (mapIn * (1 - mapOut)).toFixed(4));
   root.style.setProperty('--map-scale', (.84 + mapIn * .16 + mapOut * .42).toFixed(4));
@@ -312,6 +313,8 @@ function update() {
   });
   document.getElementById('stage-number').textContent = raw < .1 ? '01' : raw < .23 ? '02' : raw < .40 ? '03' : raw < .51 ? '04' : raw < .85 ? '05' : raw < 1.015 ? '06' : raw < 1.53 ? '07' : raw < 1.70 ? '08' : raw < 2.055 ? '09' : raw < 2.20 ? '10' : raw < 2.85 ? '11' : raw < 2.99 ? '12' : '13';
   document.getElementById('progress-copy').textContent = raw < .23 ? 'ROMANS 12' : raw < .40 ? 'ROMANS / BACKGROUND' : raw < .51 ? 'THE WHOLE LETTER' : raw < .85 ? 'THE GOSPEL’S LOGIC' : raw < 1.015 ? 'THREE RESPONSES' : raw < 1.53 ? 'THEREFORE / WORSHIP' : raw < 1.70 ? 'ALL OF YOU' : raw < 2.055 ? 'THEREFORE / SERVE' : raw < 2.20 ? 'THE WHOLE BODY' : raw < 2.85 ? 'THEREFORE / LOVE' : raw < 2.99 ? 'THREE RESPONSES' : 'THE END';
+  const readerAnchor = raw < .23 ? 'chapter' : raw < .85 ? 'context' : raw < 1.015 ? 'takeaways' : raw < 1.70 ? 'worship' : raw < 2.20 ? 'serve' : raw < 2.85 ? 'love' : 'takeaways';
+  readModeLink.href = `read.html#${readerAnchor}`;
   const chapterIsActive = p >= .1 && p < .23;
   const backgroundIsActive = raw >= .23 && raw < .40;
   const mapIsActive = !backgroundIsActive && p >= .23 && p < .38;
@@ -454,6 +457,34 @@ window.addEventListener('wheel', event => {
   }
 }, {passive:false});
 
+// A phone swipe advances one beat. Native momentum scrolling can otherwise skip
+// the Romans background slide and snap back toward a later checkpoint.
+let touchGesture = null;
+stage.addEventListener('touchstart', event => {
+  if (event.touches.length !== 1 || event.target.closest('a,button')) {
+    touchGesture = null;
+    return;
+  }
+  touchGesture = {x:event.touches[0].clientX, y:event.touches[0].clientY};
+}, {passive:true});
+stage.addEventListener('touchmove', event => {
+  if (!touchGesture || event.touches.length !== 1) {
+    touchGesture = null;
+    return;
+  }
+  const dx = event.touches[0].clientX - touchGesture.x;
+  const dy = event.touches[0].clientY - touchGesture.y;
+  if (Math.abs(dy) > 4 && Math.abs(dy) > Math.abs(dx) && !window.getSelection()?.toString()) event.preventDefault();
+}, {passive:false});
+stage.addEventListener('touchend', event => {
+  if (!touchGesture || event.changedTouches.length !== 1) return;
+  const dx = event.changedTouches[0].clientX - touchGesture.x;
+  const dy = event.changedTouches[0].clientY - touchGesture.y;
+  touchGesture = null;
+  if (Math.abs(dy) > 38 && Math.abs(dy) > Math.abs(dx) * 1.2 && !window.getSelection()?.toString()) step(dy < 0 ? 1 : -1);
+}, {passive:true});
+stage.addEventListener('touchcancel', () => { touchGesture = null; }, {passive:true});
+
 window.addEventListener('keydown', event => {
   if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, [contenteditable]')) return;
   if (event.target.closest('button') && (event.key === ' ' || event.key === 'Enter')) return;
@@ -532,3 +563,10 @@ function fitAll() { fitHandNotes(); fitPassages(); }
 window.addEventListener('resize', fitAll);
 document.fonts?.ready.then(fitAll);
 fitAll();
+const requestedStep = Number(new URLSearchParams(location.search).get('step'));
+if (Number.isInteger(requestedStep) && requestedStep > 0 && requestedStep < checkpoints.length) {
+  requestAnimationFrame(() => {
+    window.scrollTo(0, track.offsetTop + checkpoints[requestedStep] / storyEnd * Math.max(1, track.offsetHeight - window.innerHeight));
+    scheduleUpdate();
+  });
+}

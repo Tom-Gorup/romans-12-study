@@ -20,3 +20,9 @@ Each section has one persistent title with a small three-dot mark and one large 
 | Small screens | Stack the reading and annotation areas. Keep the same 7% side inset and shared mobile scripture size. |
 
 The shared CSS variables and layout rules are in `dist/enhancements.css` under “Shared verse-slide standard.” Use those variables for future changes instead of slide-specific font or positioning overrides. Verses 1–2 form one paragraph; scrolling advances their annotation states without replacing either verse, then shows the body, mind, and allegiance summary. Verses 3–4 and 5–8 each form one selectable paragraph with a reading beat and an annotation beat. Verses 9–13 and 14–21 each form one selectable paragraph with a full-width reading area. A companion action slide follows each love passage; the three-response overview returns as the closing slide.
+
+## Audience reading view
+
+Keep `dist/read.html` as the optional, naturally scrolling companion to the staged presentation. It loads the scripture and teaching text from `dist/index.html`, so edits to the source passage and reflections appear in both views. The reader groups the passage into the chapter and the three thematic sections, with no annotation animation or fixed slide height. A− and A+ enlarge the reading text, and the viewport allows native pinch zoom. Do not add note storage or personal data collection.
+
+On narrow screens, the presentation's full-chapter slide uses three readable section cards and a link to the complete chapter in Read view. The presentation still retains the full chapter in its source for copying and for the reader page. A mobile vertical swipe should advance exactly one presentation checkpoint; test both directions around the chapter, background, and book-map slides whenever scroll behavior changes.
