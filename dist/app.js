@@ -335,6 +335,7 @@ function update() {
   responsesReprise.classList.toggle('is-active', repriseIsActive);
   focus.classList.toggle('is-active', focusIsActive);
   intro.setAttribute('aria-hidden', p >= .1);
+  intro.inert = p >= .1;
   overview.setAttribute('aria-hidden', !chapterIsActive);
   romansBackground.setAttribute('aria-hidden', !backgroundIsActive);
   bookMap.setAttribute('aria-hidden', !mapIsActive);

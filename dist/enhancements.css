@@ -641,3 +641,25 @@
   .standing-list { gap:1px; }
   .standing-list li { font-size:15px; padding:4px 0; line-height:1.16; }
 }
+
+/* A high-contrast QR tile remains in the opening corner while the mark stays central. */
+.intro-qr { position:absolute; right:6%; bottom:7%; z-index:4; display:flex; flex-direction:column; align-items:center; gap:7px; padding:9px; border:1px solid #70462e; background:#1a1511; color:var(--orange-light); text-decoration:none; font:700 9px/1 Arial,sans-serif; letter-spacing:.2em; pointer-events:auto; }
+.intro-qr img { display:block; width:126px; height:126px; background:#f4ede3; }
+.intro-qr:hover,.intro-qr:focus-visible { border-color:var(--orange-light); outline:2px solid var(--orange-light); outline-offset:2px; }
+
+/* Keep the historical image intact; soften only the center of the pelvis. */
+.vitruvian-figure { position:relative; width:100%; max-width:345px; justify-self:center; }
+.vitruvian-figure img { width:100%; height:auto; max-height:min(68vh,670px); object-fit:contain; border:1px solid #785b3a; }
+.vitruvian-modesty { position:absolute; left:45.5%; top:44.5%; width:9%; height:7%; border-radius:48%; background:rgba(219,190,136,.14); -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px); pointer-events:none; }
+
+/* Both love readings grow by 30%; fitPassages scales down only when a viewport needs it. */
+.love-reading .passage-text { font-size:clamp(23.4px,2.73vw,35.1px); }
+@media(max-width:700px) {
+  .love-reading .passage-text { font-size:23.4px; }
+  .intro-qr { right:5%; bottom:5%; padding:6px; gap:5px; font-size:7px; }
+  .intro-qr img { width:88px; height:88px; }
+}
+@media(max-width:450px) {
+  .love-reading .passage-text { font-size:19.5px; }
+  .intro-qr img { width:72px; height:72px; }
+}
