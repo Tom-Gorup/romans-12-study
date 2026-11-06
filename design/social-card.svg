@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="background" cx="65%" cy="42%" r="80%">
+      <stop offset="0" stop-color="#1b1915"/>
+      <stop offset="0.6" stop-color="#10100f"/>
+      <stop offset="1" stop-color="#090909"/>
+    </radialGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#c96d3a" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#c96d3a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="953" cy="304" r="230" fill="url(#glow)"/>
+  <path d="M96 114H152" stroke="#dd8652" stroke-width="3"/>
+  <text x="176" y="121" fill="#aaa59b" font-family="Noto Sans,Arial,sans-serif" font-size="18" font-weight="500" letter-spacing="4">ANNOTATED STUDY</text>
+  <text x="90" y="292" fill="#e9e4d9" font-family="Noto Serif,Georgia,serif" font-size="96" letter-spacing="-5">Romans 12</text>
+  <text x="96" y="377" fill="#dd8652" font-family="Noto Serif,Georgia,serif" font-size="54" font-style="italic" letter-spacing="-1">therefore</text>
+  <g fill="#dd8652">
+    <circle cx="879" cy="239" r="33"/>
+    <circle cx="1019" cy="239" r="33"/>
+    <circle cx="949" cy="383" r="33"/>
+  </g>
+  <path d="M96 475H1104" stroke="#474038" stroke-width="1"/>
+  <text x="96" y="531" fill="#bbb5aa" font-family="Noto Sans,Arial,sans-serif" font-size="20" letter-spacing="3">WORSHIP</text>
+  <circle cx="257" cy="524" r="2.5" fill="#c96d3a"/>
+  <text x="285" y="531" fill="#bbb5aa" font-family="Noto Sans,Arial,sans-serif" font-size="20" letter-spacing="3">SERVICE</text>
+  <circle cx="434" cy="524" r="2.5" fill="#c96d3a"/>
+  <text x="462" y="531" fill="#bbb5aa" font-family="Noto Sans,Arial,sans-serif" font-size="20" letter-spacing="3">GENUINE LOVE</text>
+</svg>
